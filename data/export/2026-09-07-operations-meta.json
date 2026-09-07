@@ -5,21 +5,21 @@
     "2026-09-07-浦东35路.jsonl",
     "2026-09-07-浦东78路.jsonl"
   ],
-  "successful_snapshots": 3,
-  "trip_count": 7,
+  "successful_snapshots": 24,
+  "trip_count": 8,
   "routes": {
-    "浦东78路": 2,
+    "浦东78路": 3,
     "浦东35路": 2,
     "182路": 3
   },
   "confidence": {
-    "A": 0,
-    "B": 0,
-    "C": 0,
-    "D": 7
+    "A": 6,
+    "B": 1,
+    "C": 1,
+    "D": 0
   },
   "service_types": {
-    "全程车": 7
+    "全程车": 8
   },
   "ranking_rule": "Within-route ranking uses each vehicle's arithmetic mean of rank-eligible full-trip runtimes; lower mean runtime ranks faster. Rank is numeric only.",
   "arrival_rule": "Terminal ETA evidence is preferred. Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes.",
