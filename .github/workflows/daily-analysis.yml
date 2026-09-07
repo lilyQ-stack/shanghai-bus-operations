@@ -1,0 +1,68 @@
+name: Daily Operations Analysis
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Shanghai 23:00 daily (15:00 UTC)
+    - cron: '0 15 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-operations-analysis
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build daily exports
+        run: python src/analyze_daily.py
+
+      - name: Commit daily exports
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          date_cst="$(TZ=Asia/Shanghai date +%F)"
+
+          rm -rf /tmp/daily-export
+          mkdir -p /tmp/daily-export
+          cp -a data/export/. /tmp/daily-export/
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p data/export
+            cp -a /tmp/daily-export/. data/export/
+            git add data/export
+            if git diff --cached --quiet; then
+              echo 'Daily export already current.'
+              exit 0
+            fi
+            git commit -m "data: publish ${date_cst} daily operations analysis"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              echo 'Failed to push daily export after retries.'
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
