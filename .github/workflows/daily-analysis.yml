@@ -5,6 +5,12 @@ on:
   schedule:
     # Shanghai 23:00 daily (15:00 UTC)
     - cron: '0 15 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/daily-analysis.yml'
+      - 'src/analyze_daily.py'
+      - 'requirements.txt'
 
 permissions:
   contents: write
