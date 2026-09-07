@@ -1,0 +1,118 @@
+name: SHMAAS Combined Sampler
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Shanghai 05:30-22:30, every 15 minutes (UTC schedule)
+    - cron: '30,45 21 * * *'
+    - cron: '*/15 22-23,0-13 * * *'
+    - cron: '0,15,30 14 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: shmaas-combined-sampler
+  cancel-in-progress: false
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Sample all routes sequentially
+        id: sample
+        shell: bash
+        run: |
+          set +e
+          failed=0
+          for route in '浦东78路' '浦东35路' '182路'; do
+            echo "=== Sampling ${route} ==="
+            python src/shmaas_key_stop_sampler.py --route "$route"
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              echo "Sampler failed for ${route} with rc=${rc}"
+              failed=1
+            fi
+          done
+          echo "failed=${failed}" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Preserve samples in one commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          date_cst="$(TZ=Asia/Shanghai date +%F)"
+
+          rm -rf /tmp/shmaas-new
+          mkdir -p /tmp/shmaas-new
+          found=0
+          for route in '浦东78路' '浦东35路' '182路'; do
+            file="data/shmaas/${date_cst}-${route}.jsonl"
+            latest="data/shmaas/latest-${route}.json"
+            if [ -f "$file" ]; then
+              tail -n 1 "$file" > "/tmp/shmaas-new/${route}.jsonl"
+              found=1
+            fi
+            if [ -f "$latest" ]; then
+              cp "$latest" "/tmp/shmaas-new/latest-${route}.json"
+            fi
+          done
+
+          if [ "$found" -eq 0 ]; then
+            echo 'No route produced a sample.'
+            exit 1
+          fi
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p data/shmaas
+
+            for route in '浦东78路' '浦东35路' '182路'; do
+              saved="/tmp/shmaas-new/${route}.jsonl"
+              target="data/shmaas/${date_cst}-${route}.jsonl"
+              if [ -f "$saved" ]; then
+                touch "$target"
+                record="$(cat "$saved")"
+                grep -Fqx -- "$record" "$target" || printf '%s\n' "$record" >> "$target"
+              fi
+              latest_saved="/tmp/shmaas-new/latest-${route}.json"
+              if [ -f "$latest_saved" ]; then
+                cp "$latest_saved" "data/shmaas/latest-${route}.json"
+              fi
+            done
+
+            git add data/shmaas
+            if git diff --cached --quiet; then
+              echo 'Samples already present.'
+              break
+            fi
+            git commit -m 'data: persist combined SHMAAS sample'
+            if git push origin HEAD:main; then
+              break
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              echo 'Failed to push samples after retries.'
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
+
+      - name: Fail if any route sampler failed
+        if: steps.sample.outputs.failed == '1'
+        run: |
+          echo 'At least one route returned sampling errors; successful samples were preserved.'
+          exit 1
