@@ -3,10 +3,10 @@ name: SHMAAS Combined Sampler
 on:
   workflow_dispatch:
   schedule:
-    # Shanghai 05:30-22:30, every 15 minutes (UTC schedule)
-    - cron: '30,45 21 * * *'
-    - cron: '*/15 22-23,0-13 * * *'
-    - cron: '0,15,30 14 * * *'
+    # Shanghai 05:30-22:30, every 10 minutes (UTC schedule)
+    - cron: '30,40,50 21 * * *'
+    - cron: '*/10 22-23,0-13 * * *'
+    - cron: '0,10,20,30 14 * * *'
   push:
     branches: [main]
     paths:
