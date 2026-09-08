@@ -1,5 +1,5 @@
 {
-  "sample_time_cst": "2026-09-08T16:52:12+08:00",
+  "sample_time_cst": "2026-09-08T17:14:34+08:00",
   "date_cst": "2026-09-08",
   "source": "https://api.shmaas.net",
   "route": "浦东78路",
@@ -8,125 +8,125 @@
   "requests": [
     {
       "endpoint": "querytrafficline",
-      "elapsed_ms": 2073
+      "elapsed_ms": 1729
     },
     {
       "endpoint": "querybusline",
       "direction": 0,
-      "elapsed_ms": 1446
+      "elapsed_ms": 1262
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "start_133733",
-      "elapsed_ms": 1535
+      "elapsed_ms": 1018
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "133893",
-      "elapsed_ms": 1517
+      "elapsed_ms": 1196
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "133743",
-      "elapsed_ms": 1477
+      "elapsed_ms": 896
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "133748",
-      "elapsed_ms": 1247
+      "elapsed_ms": 1083
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "133753",
-      "elapsed_ms": 1422
+      "elapsed_ms": 1111
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "133758",
-      "elapsed_ms": 1579
+      "elapsed_ms": 996
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "133763",
-      "elapsed_ms": 1316
+      "elapsed_ms": 1527
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "133768",
-      "elapsed_ms": 1688
+      "elapsed_ms": 1214
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "133772",
-      "elapsed_ms": 1216
+      "elapsed_ms": 1062
     },
     {
       "endpoint": "querybusline",
       "direction": 1,
-      "elapsed_ms": 1251
+      "elapsed_ms": 1044
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "start_133773",
-      "elapsed_ms": 1468
+      "elapsed_ms": 912
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "133778",
-      "elapsed_ms": 1457
+      "elapsed_ms": 971
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "133783",
-      "elapsed_ms": 1297
+      "elapsed_ms": 1034
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "133787",
-      "elapsed_ms": 1538
+      "elapsed_ms": 980
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "133792",
-      "elapsed_ms": 1208
+      "elapsed_ms": 1076
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "133797",
-      "elapsed_ms": 1561
+      "elapsed_ms": 1022
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "133802",
-      "elapsed_ms": 1462
+      "elapsed_ms": 987
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "133807",
-      "elapsed_ms": 1323
+      "elapsed_ms": 979
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "133812",
-      "elapsed_ms": 1494
+      "elapsed_ms": 1071
     }
   ],
   "directions": [
@@ -267,103 +267,45 @@
         1
       ],
       "roles": [
-        "dispatch"
+        "current",
+        "next"
       ],
       "observations": [
         {
           "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 1,
-          "stop_id": "start_133773",
-          "stop_name": "锦带路迎春路（浦东新区办公中心）",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 6,
-          "stop_id": "133778",
-          "stop_name": "芳甸路杨高中路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
+          "role": "current",
           "stop_seq": 11,
           "stop_id": "133783",
           "stop_name": "金杨路枣庄路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "arrive_time": "2",
+          "distance": "526",
+          "remaining_stops": 2,
           "service_hints": []
         },
         {
           "direction": 1,
-          "role": "dispatch",
+          "role": "next",
           "stop_seq": 16,
           "stop_id": "133787",
           "stop_name": "五莲路荷泽路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "arrive_time": "14",
+          "distance": "3095",
+          "remaining_stops": "7",
           "service_hints": []
         },
         {
           "direction": 1,
-          "role": "dispatch",
+          "role": "next",
           "stop_seq": 21,
           "stop_id": "133792",
           "stop_name": "巨峰路成园路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 26,
-          "stop_id": "133797",
-          "stop_name": "金高路俱进路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 31,
-          "stop_id": "133802",
-          "stop_name": "杨高北路夏碧路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 36,
-          "stop_id": "133807",
-          "stop_name": "大同路石家街（市七医院）",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 41,
-          "stop_id": "133812",
-          "stop_name": "港城路地铁站",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "arrive_time": "29",
+          "distance": "5720",
+          "remaining_stops": "12",
           "service_hints": []
         }
       ],
-      "dispatch_times": [
-        "16:55"
-      ]
+      "dispatch_times": []
     },
     {
       "plate": "沪A35186D",
@@ -384,7 +326,7 @@
           "stop_id": "start_133733",
           "stop_name": "港城路地铁站",
           "dispatch_time": "17:25",
-          "dispatch_countdown": "剩余33分钟",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -394,7 +336,7 @@
           "stop_id": "133893",
           "stop_name": "张杨北路大同路",
           "dispatch_time": "17:25",
-          "dispatch_countdown": "剩余33分钟",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -404,7 +346,7 @@
           "stop_id": "133743",
           "stop_name": "杨高北路夏碧路",
           "dispatch_time": "17:25",
-          "dispatch_countdown": "剩余33分钟",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -414,7 +356,7 @@
           "stop_id": "133748",
           "stop_name": "金高路俱进路",
           "dispatch_time": "17:25",
-          "dispatch_countdown": "剩余33分钟",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -424,7 +366,7 @@
           "stop_id": "133753",
           "stop_name": "巨峰路成园路",
           "dispatch_time": "17:25",
-          "dispatch_countdown": "剩余33分钟",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -434,7 +376,7 @@
           "stop_id": "133758",
           "stop_name": "五莲路荷泽路",
           "dispatch_time": "17:25",
-          "dispatch_countdown": "剩余33分钟",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -444,7 +386,7 @@
           "stop_id": "133763",
           "stop_name": "金杨路金口路",
           "dispatch_time": "17:25",
-          "dispatch_countdown": "剩余33分钟",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -454,7 +396,7 @@
           "stop_id": "133768",
           "stop_name": "丁香路金松路",
           "dispatch_time": "17:25",
-          "dispatch_countdown": "剩余33分钟",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -464,7 +406,7 @@
           "stop_id": "133772",
           "stop_name": "锦带路迎春路（浦东新区办公中心）",
           "dispatch_time": "17:25",
-          "dispatch_countdown": "剩余33分钟",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         }
       ],
@@ -481,29 +423,41 @@
         1
       ],
       "roles": [
+        "current",
         "next"
       ],
       "observations": [
         {
           "direction": 1,
-          "role": "next",
-          "stop_seq": 26,
-          "stop_id": "133797",
-          "stop_name": "金高路俱进路",
-          "arrive_time": "6",
-          "distance": "2169",
-          "remaining_stops": "5",
+          "role": "current",
+          "stop_seq": 31,
+          "stop_id": "133802",
+          "stop_name": "杨高北路夏碧路",
+          "arrive_time": "3",
+          "distance": "621",
+          "remaining_stops": 1,
           "service_hints": []
         },
         {
           "direction": 1,
           "role": "next",
-          "stop_seq": 31,
-          "stop_id": "133802",
-          "stop_name": "杨高北路夏碧路",
-          "arrive_time": "24",
-          "distance": "7241",
-          "remaining_stops": "10",
+          "stop_seq": 36,
+          "stop_id": "133807",
+          "stop_name": "大同路石家街（市七医院）",
+          "arrive_time": "16",
+          "distance": "3528",
+          "remaining_stops": "6",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "next",
+          "stop_seq": 41,
+          "stop_id": "133812",
+          "stop_name": "港城路地铁站",
+          "arrive_time": "27",
+          "distance": "5962",
+          "remaining_stops": "11",
           "service_hints": []
         }
       ],
@@ -518,6 +472,34 @@
         0
       ],
       "roles": [
+        "next"
+      ],
+      "observations": [
+        {
+          "direction": 0,
+          "role": "next",
+          "stop_seq": 16,
+          "stop_id": "133748",
+          "stop_name": "金高路俱进路",
+          "arrive_time": "14",
+          "distance": "5045",
+          "remaining_stops": "5",
+          "service_hints": []
+        }
+      ],
+      "dispatch_times": []
+    },
+    {
+      "plate": "沪A36809D",
+      "raw_values": [
+        "沪A36809D无障碍"
+      ],
+      "directions": [
+        0,
+        1
+      ],
+      "roles": [
+        "current",
         "dispatch"
       ],
       "observations": [
@@ -527,8 +509,8 @@
           "stop_seq": 1,
           "stop_id": "start_133733",
           "stop_name": "港城路地铁站",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "dispatch_time": "17:55",
+          "dispatch_countdown": "剩余41分钟",
           "service_hints": []
         },
         {
@@ -537,8 +519,8 @@
           "stop_seq": 6,
           "stop_id": "133893",
           "stop_name": "张杨北路大同路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "dispatch_time": "17:55",
+          "dispatch_countdown": "剩余41分钟",
           "service_hints": []
         },
         {
@@ -547,8 +529,8 @@
           "stop_seq": 11,
           "stop_id": "133743",
           "stop_name": "杨高北路夏碧路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "dispatch_time": "17:55",
+          "dispatch_countdown": "剩余41分钟",
           "service_hints": []
         },
         {
@@ -557,8 +539,8 @@
           "stop_seq": 16,
           "stop_id": "133748",
           "stop_name": "金高路俱进路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "dispatch_time": "17:55",
+          "dispatch_countdown": "剩余41分钟",
           "service_hints": []
         },
         {
@@ -567,8 +549,8 @@
           "stop_seq": 21,
           "stop_id": "133753",
           "stop_name": "巨峰路成园路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "dispatch_time": "17:55",
+          "dispatch_countdown": "剩余41分钟",
           "service_hints": []
         },
         {
@@ -577,8 +559,8 @@
           "stop_seq": 26,
           "stop_id": "133758",
           "stop_name": "五莲路荷泽路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "dispatch_time": "17:55",
+          "dispatch_countdown": "剩余41分钟",
           "service_hints": []
         },
         {
@@ -587,8 +569,8 @@
           "stop_seq": 31,
           "stop_id": "133763",
           "stop_name": "金杨路金口路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "dispatch_time": "17:55",
+          "dispatch_countdown": "剩余41分钟",
           "service_hints": []
         },
         {
@@ -597,8 +579,8 @@
           "stop_seq": 36,
           "stop_id": "133768",
           "stop_name": "丁香路金松路",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "dispatch_time": "17:55",
+          "dispatch_countdown": "剩余41分钟",
           "service_hints": []
         },
         {
@@ -607,63 +589,36 @@
           "stop_seq": 40,
           "stop_id": "133772",
           "stop_name": "锦带路迎春路（浦东新区办公中心）",
-          "dispatch_time": "16:55",
-          "dispatch_countdown": "剩余3分钟",
+          "dispatch_time": "17:55",
+          "dispatch_countdown": "剩余41分钟",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "current",
+          "stop_seq": 36,
+          "stop_id": "133807",
+          "stop_name": "大同路石家街（市七医院）",
+          "arrive_time": "5",
+          "distance": "1314",
+          "remaining_stops": 3,
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "current",
+          "stop_seq": 41,
+          "stop_id": "133812",
+          "stop_name": "港城路地铁站",
+          "arrive_time": "16",
+          "distance": "3747",
+          "remaining_stops": 8,
           "service_hints": []
         }
       ],
       "dispatch_times": [
-        "16:55"
+        "17:55"
       ]
-    },
-    {
-      "plate": "沪A36809D",
-      "raw_values": [
-        "沪A36809D无障碍"
-      ],
-      "directions": [
-        1
-      ],
-      "roles": [
-        "current",
-        "next"
-      ],
-      "observations": [
-        {
-          "direction": 1,
-          "role": "current",
-          "stop_seq": 26,
-          "stop_id": "133797",
-          "stop_name": "金高路俱进路",
-          "arrive_time": "2",
-          "distance": "681",
-          "remaining_stops": 2,
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "current",
-          "stop_seq": 31,
-          "stop_id": "133802",
-          "stop_name": "杨高北路夏碧路",
-          "arrive_time": "20",
-          "distance": "5752",
-          "remaining_stops": 7,
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "next",
-          "stop_seq": 36,
-          "stop_id": "133807",
-          "stop_name": "大同路石家街（市七医院）",
-          "arrive_time": "29",
-          "distance": "8674",
-          "remaining_stops": "12",
-          "service_hints": []
-        }
-      ],
-      "dispatch_times": []
     },
     {
       "plate": "沪A51173D",
@@ -681,34 +636,34 @@
         {
           "direction": 0,
           "role": "current",
-          "stop_seq": 21,
-          "stop_id": "133753",
-          "stop_name": "巨峰路成园路",
-          "arrive_time": "0",
-          "distance": "0",
-          "remaining_stops": 0,
-          "service_hints": []
-        },
-        {
-          "direction": 0,
-          "role": "current",
-          "stop_seq": 26,
-          "stop_id": "133758",
-          "stop_name": "五莲路荷泽路",
-          "arrive_time": "11",
-          "distance": "2565",
-          "remaining_stops": 5,
+          "stop_seq": 31,
+          "stop_id": "133763",
+          "stop_name": "金杨路金口路",
+          "arrive_time": "7",
+          "distance": "1311",
+          "remaining_stops": 3,
           "service_hints": []
         },
         {
           "direction": 0,
           "role": "next",
-          "stop_seq": 31,
-          "stop_id": "133763",
-          "stop_name": "金杨路金口路",
-          "arrive_time": "21",
-          "distance": "5632",
-          "remaining_stops": "10",
+          "stop_seq": 36,
+          "stop_id": "133768",
+          "stop_name": "丁香路金松路",
+          "arrive_time": "23",
+          "distance": "5472",
+          "remaining_stops": "8",
+          "service_hints": []
+        },
+        {
+          "direction": 0,
+          "role": "next",
+          "stop_seq": 40,
+          "stop_id": "133772",
+          "stop_name": "锦带路迎春路（浦东新区办公中心）",
+          "arrive_time": "31",
+          "distance": "7197",
+          "remaining_stops": "12",
           "service_hints": []
         }
       ],
@@ -730,22 +685,33 @@
         {
           "direction": 1,
           "role": "current",
-          "stop_seq": 11,
-          "stop_id": "133783",
-          "stop_name": "金杨路枣庄路",
-          "arrive_time": "9",
-          "distance": "3405",
+          "stop_seq": 16,
+          "stop_id": "133787",
+          "stop_name": "五莲路荷泽路",
+          "arrive_time": "0",
+          "distance": "0",
+          "remaining_stops": 0,
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "current",
+          "stop_seq": 21,
+          "stop_id": "133792",
+          "stop_name": "巨峰路成园路",
+          "arrive_time": "12",
+          "distance": "2625",
           "remaining_stops": 5,
           "service_hints": []
         },
         {
           "direction": 1,
           "role": "next",
-          "stop_seq": 16,
-          "stop_id": "133787",
-          "stop_name": "五莲路荷泽路",
-          "arrive_time": "16",
-          "distance": "5882",
+          "stop_seq": 26,
+          "stop_id": "133797",
+          "stop_name": "金高路俱进路",
+          "arrive_time": "23",
+          "distance": "4930",
           "remaining_stops": "10",
           "service_hints": []
         }
@@ -761,6 +727,43 @@
         0
       ],
       "roles": [
+        "current"
+      ],
+      "observations": [
+        {
+          "direction": 0,
+          "role": "current",
+          "stop_seq": 6,
+          "stop_id": "133893",
+          "stop_name": "张杨北路大同路",
+          "arrive_time": "6",
+          "distance": "1238",
+          "remaining_stops": 3,
+          "service_hints": []
+        },
+        {
+          "direction": 0,
+          "role": "current",
+          "stop_seq": 11,
+          "stop_id": "133743",
+          "stop_name": "杨高北路夏碧路",
+          "arrive_time": "16",
+          "distance": "4082",
+          "remaining_stops": 8,
+          "service_hints": []
+        }
+      ],
+      "dispatch_times": []
+    },
+    {
+      "plate": "沪A55150D",
+      "raw_values": [
+        "沪A55150D无障碍"
+      ],
+      "directions": [
+        0
+      ],
+      "roles": [
         "dispatch"
       ],
       "observations": [
@@ -770,8 +773,8 @@
           "stop_seq": 1,
           "stop_id": "start_133733",
           "stop_name": "港城路地铁站",
-          "dispatch_time": "17:10",
-          "dispatch_countdown": "剩余18分钟",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         },
         {
@@ -780,8 +783,8 @@
           "stop_seq": 6,
           "stop_id": "133893",
           "stop_name": "张杨北路大同路",
-          "dispatch_time": "17:10",
-          "dispatch_countdown": "剩余18分钟",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         },
         {
@@ -790,8 +793,8 @@
           "stop_seq": 11,
           "stop_id": "133743",
           "stop_name": "杨高北路夏碧路",
-          "dispatch_time": "17:10",
-          "dispatch_countdown": "剩余18分钟",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         },
         {
@@ -800,8 +803,8 @@
           "stop_seq": 16,
           "stop_id": "133748",
           "stop_name": "金高路俱进路",
-          "dispatch_time": "17:10",
-          "dispatch_countdown": "剩余18分钟",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         },
         {
@@ -810,8 +813,8 @@
           "stop_seq": 21,
           "stop_id": "133753",
           "stop_name": "巨峰路成园路",
-          "dispatch_time": "17:10",
-          "dispatch_countdown": "剩余18分钟",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         },
         {
@@ -820,8 +823,8 @@
           "stop_seq": 26,
           "stop_id": "133758",
           "stop_name": "五莲路荷泽路",
-          "dispatch_time": "17:10",
-          "dispatch_countdown": "剩余18分钟",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         },
         {
@@ -830,8 +833,8 @@
           "stop_seq": 31,
           "stop_id": "133763",
           "stop_name": "金杨路金口路",
-          "dispatch_time": "17:10",
-          "dispatch_countdown": "剩余18分钟",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         },
         {
@@ -840,8 +843,8 @@
           "stop_seq": 36,
           "stop_id": "133768",
           "stop_name": "丁香路金松路",
-          "dispatch_time": "17:10",
-          "dispatch_countdown": "剩余18分钟",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         },
         {
@@ -850,40 +853,14 @@
           "stop_seq": 40,
           "stop_id": "133772",
           "stop_name": "锦带路迎春路（浦东新区办公中心）",
-          "dispatch_time": "17:10",
-          "dispatch_countdown": "剩余18分钟",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         }
       ],
       "dispatch_times": [
-        "17:10"
+        "17:40"
       ]
-    },
-    {
-      "plate": "沪A55150D",
-      "raw_values": [
-        "沪A55150D无障碍"
-      ],
-      "directions": [
-        1
-      ],
-      "roles": [
-        "current"
-      ],
-      "observations": [
-        {
-          "direction": 1,
-          "role": "current",
-          "stop_seq": 36,
-          "stop_id": "133807",
-          "stop_name": "大同路石家街（市七医院）",
-          "arrive_time": "4",
-          "distance": "1298",
-          "remaining_stops": 3,
-          "service_hints": []
-        }
-      ],
-      "dispatch_times": []
     },
     {
       "plate": "沪A55207D",
@@ -901,34 +878,34 @@
         {
           "direction": 0,
           "role": "current",
-          "stop_seq": 16,
-          "stop_id": "133748",
-          "stop_name": "金高路俱进路",
-          "arrive_time": "11",
-          "distance": "4730",
-          "remaining_stops": 5,
-          "service_hints": []
-        },
-        {
-          "direction": 0,
-          "role": "next",
           "stop_seq": 21,
           "stop_id": "133753",
           "stop_name": "巨峰路成园路",
-          "arrive_time": "18",
-          "distance": "6966",
-          "remaining_stops": "10",
+          "arrive_time": "3",
+          "distance": "404",
+          "remaining_stops": 2,
+          "service_hints": []
+        },
+        {
+          "direction": 0,
+          "role": "current",
+          "stop_seq": 26,
+          "stop_id": "133758",
+          "stop_name": "五莲路荷泽路",
+          "arrive_time": "17",
+          "distance": "2970",
+          "remaining_stops": 7,
           "service_hints": []
         },
         {
           "direction": 0,
           "role": "next",
-          "stop_seq": 26,
-          "stop_id": "133758",
-          "stop_name": "五莲路荷泽路",
-          "arrive_time": "28",
-          "distance": "9532",
-          "remaining_stops": "15",
+          "stop_seq": 31,
+          "stop_id": "133763",
+          "stop_name": "金杨路金口路",
+          "arrive_time": "30",
+          "distance": "6037",
+          "remaining_stops": "12",
           "service_hints": []
         }
       ],
@@ -943,6 +920,44 @@
         1
       ],
       "roles": [
+        "current",
+        "next"
+      ],
+      "observations": [
+        {
+          "direction": 1,
+          "role": "current",
+          "stop_seq": 6,
+          "stop_id": "133778",
+          "stop_name": "芳甸路杨高中路",
+          "arrive_time": "1",
+          "distance": "171",
+          "remaining_stops": 1,
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "next",
+          "stop_seq": 11,
+          "stop_id": "133783",
+          "stop_name": "金杨路枣庄路",
+          "arrive_time": "18",
+          "distance": "4376",
+          "remaining_stops": "6",
+          "service_hints": []
+        }
+      ],
+      "dispatch_times": []
+    },
+    {
+      "plate": "沪A56630D",
+      "raw_values": [
+        "沪A56630D无障碍"
+      ],
+      "directions": [
+        1
+      ],
+      "roles": [
         "dispatch"
       ],
       "observations": [
@@ -952,8 +967,8 @@
           "stop_seq": 1,
           "stop_id": "start_133773",
           "stop_name": "锦带路迎春路（浦东新区办公中心）",
-          "dispatch_time": "17:05",
-          "dispatch_countdown": "剩余13分钟",
+          "dispatch_time": "17:25",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -962,8 +977,8 @@
           "stop_seq": 6,
           "stop_id": "133778",
           "stop_name": "芳甸路杨高中路",
-          "dispatch_time": "17:05",
-          "dispatch_countdown": "剩余13分钟",
+          "dispatch_time": "17:25",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -972,8 +987,8 @@
           "stop_seq": 11,
           "stop_id": "133783",
           "stop_name": "金杨路枣庄路",
-          "dispatch_time": "17:05",
-          "dispatch_countdown": "剩余13分钟",
+          "dispatch_time": "17:25",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -982,8 +997,8 @@
           "stop_seq": 16,
           "stop_id": "133787",
           "stop_name": "五莲路荷泽路",
-          "dispatch_time": "17:05",
-          "dispatch_countdown": "剩余13分钟",
+          "dispatch_time": "17:25",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -992,8 +1007,8 @@
           "stop_seq": 21,
           "stop_id": "133792",
           "stop_name": "巨峰路成园路",
-          "dispatch_time": "17:05",
-          "dispatch_countdown": "剩余13分钟",
+          "dispatch_time": "17:25",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -1002,8 +1017,8 @@
           "stop_seq": 26,
           "stop_id": "133797",
           "stop_name": "金高路俱进路",
-          "dispatch_time": "17:05",
-          "dispatch_countdown": "剩余13分钟",
+          "dispatch_time": "17:25",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -1012,8 +1027,8 @@
           "stop_seq": 31,
           "stop_id": "133802",
           "stop_name": "杨高北路夏碧路",
-          "dispatch_time": "17:05",
-          "dispatch_countdown": "剩余13分钟",
+          "dispatch_time": "17:25",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -1022,8 +1037,8 @@
           "stop_seq": 36,
           "stop_id": "133807",
           "stop_name": "大同路石家街（市七医院）",
-          "dispatch_time": "17:05",
-          "dispatch_countdown": "剩余13分钟",
+          "dispatch_time": "17:25",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         },
         {
@@ -1032,13 +1047,13 @@
           "stop_seq": 41,
           "stop_id": "133812",
           "stop_name": "港城路地铁站",
-          "dispatch_time": "17:05",
-          "dispatch_countdown": "剩余13分钟",
+          "dispatch_time": "17:25",
+          "dispatch_countdown": "剩余11分钟",
           "service_hints": []
         }
       ],
       "dispatch_times": [
-        "17:05"
+        "17:25"
       ]
     },
     {
@@ -1050,30 +1065,18 @@
         1
       ],
       "roles": [
-        "current",
-        "next"
+        "current"
       ],
       "observations": [
         {
           "direction": 1,
           "role": "current",
-          "stop_seq": 16,
-          "stop_id": "133787",
-          "stop_name": "五莲路荷泽路",
-          "arrive_time": "3",
-          "distance": "1162",
-          "remaining_stops": 3,
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "next",
-          "stop_seq": 21,
-          "stop_id": "133792",
-          "stop_name": "巨峰路成园路",
-          "arrive_time": "15",
-          "distance": "3787",
-          "remaining_stops": "8",
+          "stop_seq": 26,
+          "stop_id": "133797",
+          "stop_name": "金高路俱进路",
+          "arrive_time": "9",
+          "distance": "2016",
+          "remaining_stops": 5,
           "service_hints": []
         }
       ],
@@ -1088,18 +1091,41 @@
         0
       ],
       "roles": [
+        "current",
         "next"
       ],
       "observations": [
         {
           "direction": 0,
-          "role": "next",
+          "role": "current",
           "stop_seq": 16,
           "stop_id": "133748",
           "stop_name": "金高路俱进路",
-          "arrive_time": "20",
-          "distance": "7797",
-          "remaining_stops": "10",
+          "arrive_time": "6",
+          "distance": "2748",
+          "remaining_stops": 2,
+          "service_hints": []
+        },
+        {
+          "direction": 0,
+          "role": "next",
+          "stop_seq": 21,
+          "stop_id": "133753",
+          "stop_name": "巨峰路成园路",
+          "arrive_time": "16",
+          "distance": "4984",
+          "remaining_stops": "7",
+          "service_hints": []
+        },
+        {
+          "direction": 0,
+          "role": "next",
+          "stop_seq": 26,
+          "stop_id": "133758",
+          "stop_name": "五莲路荷泽路",
+          "arrive_time": "30",
+          "distance": "7550",
+          "remaining_stops": "12",
           "service_hints": []
         }
       ],
@@ -1114,18 +1140,18 @@
         1
       ],
       "roles": [
-        "current"
+        "next"
       ],
       "observations": [
         {
           "direction": 1,
-          "role": "current",
-          "stop_seq": 21,
-          "stop_id": "133792",
-          "stop_name": "巨峰路成园路",
-          "arrive_time": "9",
-          "distance": "1983",
-          "remaining_stops": 4,
+          "role": "next",
+          "stop_seq": 31,
+          "stop_id": "133802",
+          "stop_name": "杨高北路夏碧路",
+          "arrive_time": "14",
+          "distance": "3040",
+          "remaining_stops": "5",
           "service_hints": []
         }
       ],
@@ -1150,7 +1176,7 @@
           "stop_id": "start_133773",
           "stop_name": "锦带路迎春路（浦东新区办公中心）",
           "dispatch_time": "17:15",
-          "dispatch_countdown": "剩余23分钟",
+          "dispatch_countdown": "即将发车",
           "service_hints": []
         },
         {
@@ -1160,7 +1186,7 @@
           "stop_id": "133778",
           "stop_name": "芳甸路杨高中路",
           "dispatch_time": "17:15",
-          "dispatch_countdown": "剩余23分钟",
+          "dispatch_countdown": "即将发车",
           "service_hints": []
         },
         {
@@ -1170,7 +1196,7 @@
           "stop_id": "133783",
           "stop_name": "金杨路枣庄路",
           "dispatch_time": "17:15",
-          "dispatch_countdown": "剩余23分钟",
+          "dispatch_countdown": "即将发车",
           "service_hints": []
         },
         {
@@ -1180,7 +1206,7 @@
           "stop_id": "133787",
           "stop_name": "五莲路荷泽路",
           "dispatch_time": "17:15",
-          "dispatch_countdown": "剩余23分钟",
+          "dispatch_countdown": "即将发车",
           "service_hints": []
         },
         {
@@ -1190,7 +1216,7 @@
           "stop_id": "133792",
           "stop_name": "巨峰路成园路",
           "dispatch_time": "17:15",
-          "dispatch_countdown": "剩余23分钟",
+          "dispatch_countdown": "即将发车",
           "service_hints": []
         },
         {
@@ -1200,7 +1226,7 @@
           "stop_id": "133797",
           "stop_name": "金高路俱进路",
           "dispatch_time": "17:15",
-          "dispatch_countdown": "剩余23分钟",
+          "dispatch_countdown": "即将发车",
           "service_hints": []
         },
         {
@@ -1210,7 +1236,7 @@
           "stop_id": "133802",
           "stop_name": "杨高北路夏碧路",
           "dispatch_time": "17:15",
-          "dispatch_countdown": "剩余23分钟",
+          "dispatch_countdown": "即将发车",
           "service_hints": []
         },
         {
@@ -1220,7 +1246,7 @@
           "stop_id": "133807",
           "stop_name": "大同路石家街（市七医院）",
           "dispatch_time": "17:15",
-          "dispatch_countdown": "剩余23分钟",
+          "dispatch_countdown": "即将发车",
           "service_hints": []
         },
         {
@@ -1230,7 +1256,7 @@
           "stop_id": "133812",
           "stop_name": "港城路地铁站",
           "dispatch_time": "17:15",
-          "dispatch_countdown": "剩余23分钟",
+          "dispatch_countdown": "即将发车",
           "service_hints": []
         }
       ],
@@ -1244,32 +1270,137 @@
         "沪A66391D无障碍"
       ],
       "directions": [
-        0
+        0,
+        1
       ],
       "roles": [
-        "current"
+        "current",
+        "dispatch"
       ],
       "observations": [
         {
           "direction": 0,
           "role": "current",
+          "stop_seq": 36,
+          "stop_id": "133768",
+          "stop_name": "丁香路金松路",
+          "arrive_time": "2",
+          "distance": "529",
+          "remaining_stops": 2,
+          "service_hints": []
+        },
+        {
+          "direction": 0,
+          "role": "current",
+          "stop_seq": 40,
+          "stop_id": "133772",
+          "stop_name": "锦带路迎春路（浦东新区办公中心）",
+          "arrive_time": "10",
+          "distance": "2254",
+          "remaining_stops": 6,
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 1,
+          "stop_id": "start_133773",
+          "stop_name": "锦带路迎春路（浦东新区办公中心）",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 6,
+          "stop_id": "133778",
+          "stop_name": "芳甸路杨高中路",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 11,
+          "stop_id": "133783",
+          "stop_name": "金杨路枣庄路",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 16,
+          "stop_id": "133787",
+          "stop_name": "五莲路荷泽路",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 21,
+          "stop_id": "133792",
+          "stop_name": "巨峰路成园路",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 26,
+          "stop_id": "133797",
+          "stop_name": "金高路俱进路",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
           "stop_seq": 31,
-          "stop_id": "133763",
-          "stop_name": "金杨路金口路",
-          "arrive_time": "5",
-          "distance": "1301",
-          "remaining_stops": 3,
+          "stop_id": "133802",
+          "stop_name": "杨高北路夏碧路",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 36,
+          "stop_id": "133807",
+          "stop_name": "大同路石家街（市七医院）",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
+          "service_hints": []
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 41,
+          "stop_id": "133812",
+          "stop_name": "港城路地铁站",
+          "dispatch_time": "17:40",
+          "dispatch_countdown": "剩余26分钟",
           "service_hints": []
         }
       ],
-      "dispatch_times": []
+      "dispatch_times": [
+        "17:40"
+      ]
     }
   ],
   "errors": [],
   "line_id": "22201",
-  "unique_vehicle_count": 16,
+  "unique_vehicle_count": 17,
   "request_count": 21,
   "failed_sample_count": 0,
-  "avg_request_elapsed_ms": 1456,
-  "max_request_elapsed_ms": 2073
+  "avg_request_elapsed_ms": 1103,
+  "max_request_elapsed_ms": 1729
 }
