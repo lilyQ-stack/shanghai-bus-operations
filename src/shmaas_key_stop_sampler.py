@@ -21,6 +21,7 @@ SERVICE_HINT_KEY_PARTS = (
     "destination", "terminal", "endstop", "end_stop", "short", "section",
     "service_type", "servicetype", "trip_type", "triptype",
 )
+SAMPLE_STRIDE = 5
 
 
 def extract_service_hints(payload) -> list[dict]:
@@ -63,6 +64,24 @@ def normalize_plate(value):
     return re.sub(r"(无障碍|低地板|新能源|空调)$", "", str(value).strip()).strip()
 
 
+def sampling_phase(now: datetime) -> int:
+    # Rotate the spatial sample on every 10-minute slot. Five phases cover every
+    # stop without increasing the normal number of requests per run.
+    slot = (now.hour * 60 + now.minute) // 10
+    return slot % SAMPLE_STRIDE
+
+
+def sample_indices(stop_count: int, phase: int) -> list[int]:
+    if stop_count <= 0:
+        return []
+    indices = set(range(phase, stop_count, SAMPLE_STRIDE))
+    # Terminals are always observed so departures/terminal ETA evidence remains
+    # continuous while intermediate stops rotate.
+    indices.add(0)
+    indices.add(stop_count - 1)
+    return sorted(indices)
+
+
 def post(path: str, payload: dict, timeout: int = 12, retries: int = 2):
     last = None
     for attempt in range(retries + 1):
@@ -88,12 +107,15 @@ def post(path: str, payload: dict, timeout: int = 12, retries: int = 2):
 
 def collect(route: str) -> dict:
     now = datetime.now(CST)
+    phase = sampling_phase(now)
     out = {
         "sample_time_cst": now.isoformat(timespec="seconds"),
         "date_cst": now.date().isoformat(),
         "source": BASE,
         "route": route,
-        "strategy": "every_5th_stop_plus_terminal",
+        "strategy": "rotating_every_5th_stop_plus_terminals",
+        "sampling_phase": phase,
+        "sampling_stride": SAMPLE_STRIDE,
         "success": False,
         "requests": [],
         "directions": [],
@@ -163,20 +185,18 @@ def collect(route: str) -> dict:
         for seq, stop in enumerate(stops, 1):
             stop["seq"] = seq
 
-        indices = list(range(0, len(stops), 5))
-        if stops and len(stops) - 1 not in indices:
-            indices.append(len(stops) - 1)
-
+        indices = sample_indices(len(stops), phase)
         d_out = {
             "direction": direction,
             "start_stop": bus_line.get("upStartStop"),
             "end_stop": bus_line.get("upEndStop"),
             "stop_count": len(stops),
-            "sampled_stop_count": len(set(indices)),
+            "sampled_stop_count": len(indices),
+            "sampling_phase": phase,
             "sampled_stops": [],
         }
 
-        for idx in sorted(set(indices)):
+        for idx in indices:
             stop = stops[idx]
             try:
                 eta, ms = post("/traffic/v1/getbusstoparrivedetails", {
@@ -265,7 +285,7 @@ def main() -> int:
     latest_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(
-        f"route={args.route} time={result['sample_time_cst']} "
+        f"route={args.route} time={result['sample_time_cst']} phase={result['sampling_phase']} "
         f"vehicles={result['unique_vehicle_count']} requests={result['request_count']} "
         f"failures={result['failed_sample_count']}"
     )
