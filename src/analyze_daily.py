@@ -144,24 +144,28 @@ def terminal_eta(route_info, vehicle_events, route, direction, dep):
             candidates.append((e, predicted))
     if not candidates:
         return None
+
     near = [x for x in candidates if x[0]["eta"] <= 5 or (x[0]["distance"] is not None and x[0]["distance"] <= 100)]
     if near:
         e, predicted = min(near, key=lambda x: (x[0]["eta"], x[0]["time"]))
-        error = 2 if e["eta"] <= 1 or (e["distance"] is not None and e["distance"] <= 100) else 5
-        return predicted, "终点近站ETA", error
+        confirmed = e["eta"] <= 1 or (e["distance"] is not None and e["distance"] <= 100)
+        error = 2 if confirmed else 5
+        return predicted, "终点近站ETA", error, confirmed
+
     predictions = sorted(x[1] for x in candidates)
     if len(predictions) >= 2:
         spread = (predictions[-1] - predictions[0]).total_seconds() / 60
         if spread <= 10:
             median = datetime.fromtimestamp(statistics.median([x.timestamp() for x in predictions]), TZ)
-            return median, "多次终点ETA一致", max(3, min(5, round(spread / 2) + 1))
+            return median, "多次终点ETA一致", max(3, min(5, round(spread / 2) + 1)), False
+
     e, predicted = candidates[-1]
     age = e["eta"]
     if age <= 20:
-        return predicted, "末次终点ETA", 10
+        return predicted, "末次终点ETA", 10, False
     if age <= 45:
-        return predicted, "末次终点ETA", 15
-    return predicted, "末次终点ETA", 20
+        return predicted, "末次终点ETA", 15, False
+    return predicted, "末次终点ETA", 20, False
 
 
 def derive_min_full_runtimes(date, route_info, events, dispatches):
@@ -206,10 +210,6 @@ def trajectory_classification(route_info, vehicle_events, route, direction, dep,
     near_terminal = last_same["stop_name"] == terminal or (count and last_same["stop_seq"] / count >= 0.85)
     predicted = last_same["time"] + timedelta(minutes=last_same["eta"])
 
-    # Restore the mature private-repo rule: a same vehicle appearing in the
-    # reverse direction materially earlier than a confirmed full trip could
-    # finish is strong short-turn evidence. Missing progression alone is never
-    # enough. The 80% threshold protects normal terminal turnarounds.
     if min_full_runtime is not None:
         threshold = min_full_runtime * EARLY_REVERSE_RATIO
         if elapsed < threshold and not near_terminal:
@@ -226,8 +226,6 @@ def trajectory_classification(route_info, vehicle_events, route, direction, dep,
                 last_same["stop_name"], fmt_hm(predicted),
             )
 
-    # When no trustworthy full-trip baseline exists yet, keep a conservative
-    # spatial/temporal fallback rather than manufacturing a short-turn result.
     gap = (first_opp["time"] - last_same["time"]).total_seconds() / 60
     if min_full_runtime is None and not near_terminal and 0 <= gap <= 20:
         return (
@@ -285,9 +283,10 @@ def build_rows(date, route_info, events, dispatches, first_seen):
         arrival = "待确认"
         arrival_method = "证据不足"
         error = None
+        arrival_confirmed = False
         note = ""
         if eta and service_type == "全程车":
-            arrival_dt, arrival_method, error = eta
+            arrival_dt, arrival_method, error, arrival_confirmed = eta
             arrival = fmt_hm(arrival_dt)
             note = f"{arrival_method}推算，约±{error}分钟"
         elif eta and service_type == "运行异常待查":
@@ -312,6 +311,7 @@ def build_rows(date, route_info, events, dispatches, first_seen):
             "本车首次观测": fmt_hm(first_seen.get((route, plate))),
             "最后可靠采集站点": last_stop, "最后可靠预计到达时间": last_eta,
             "备注": note,
+            "_终点确认到达": arrival_confirmed,
         })
     reconcile_departures(date, rows)
     return rows
@@ -324,7 +324,11 @@ def reconcile_departures(date, rows):
     for group in by_vehicle.values():
         group.sort(key=lambda r: parse_dt(date, r["发车时间"]) or datetime.max.replace(tzinfo=TZ))
         for prev, cur in zip(group, group[1:]):
-            if prev["班次类型"] != "全程车" or prev["到达时间"] == "待确认":
+            if (
+                prev["班次类型"] != "全程车"
+                or prev["到达时间"] == "待确认"
+                or not prev.get("_终点确认到达", False)
+            ):
                 continue
             arr = parse_dt(date, prev["到达时间"])
             planned = parse_dt(date, cur["计划发车时间"])
@@ -336,9 +340,15 @@ def reconcile_departures(date, rows):
                 cur["发车时间依据"] = "终点确认到达+2分钟（覆盖计划时间）"
                 if cur["到达时间"] != "待确认":
                     end = parse_dt(date, cur["到达时间"])
-                    if end and end < actual:
-                        end += timedelta(days=1)
-                    if end:
+                    if end and end <= actual:
+                        cur["到达时间"] = "待确认"
+                        cur["全程时间"] = ""
+                        cur["到达置信度"] = "D"
+                        cur["到达估算方法"] = "证据不足"
+                        cur["参与车速排名"] = "否"
+                        cur["备注"] = "实际发车晚于原到达估计，原到达估计作废"
+                        cur["_终点确认到达"] = False
+                    elif end:
                         cur["全程时间"] = str(round((end - actual).total_seconds() / 60))
 
 
@@ -421,7 +431,7 @@ def main():
         "confidence": {grade: sum(1 for r in rows if r["到达置信度"] == grade) for grade in "ABCD"},
         "service_types": dict((k, sum(1 for r in rows if r["班次类型"] == k)) for k in sorted({r["班次类型"] for r in rows})),
         "ranking_rule": "Within-route ranking uses each vehicle's arithmetic mean of rank-eligible full-trip runtimes; lower mean runtime ranks faster. Rank is numeric only.",
-        "arrival_rule": "Terminal ETA evidence is preferred. Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes.",
+        "arrival_rule": "Terminal ETA evidence is preferred. Only a near-terminal observation with ETA <=1 minute or distance <=100m is treated as confirmed enough to override an impossible next planned departure. Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes.",
         "short_turn_rule": "A suspected short turn requires the same vehicle to be observed running in the reverse direction at least 20 minutes after departure. If that reverse observation occurs before 80% of the route/direction's same-day confirmed minimum full-trip runtime and the last same-direction observation is not near the terminal, it is classified as a suspected short turn. Missing progression alone is never sufficient.",
     }
     (export / f"{date}-operations-meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
