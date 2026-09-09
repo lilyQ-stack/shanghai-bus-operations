@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-09",
+  "source_files": [
+    "2026-09-09-182路.jsonl",
+    "2026-09-09-浦东35路.jsonl",
+    "2026-09-09-浦东78路.jsonl"
+  ],
+  "successful_snapshots": 15,
+  "trip_count": 53,
+  "routes": {
+    "浦东78路": 14,
+    "浦东35路": 21,
+    "182路": 18
+  },
+  "confidence": {
+    "A": 2,
+    "B": 1,
+    "C": 0,
+    "D": 50
+  },
+  "service_types": {
+    "全程车": 48,
+    "运行异常待查": 5
+  },
+  "ranking_rule": "Within-route ranking uses each vehicle's arithmetic mean of rank-eligible full-trip runtimes; lower mean runtime ranks faster. Rank is numeric only.",
+  "arrival_rule": "Terminal ETA evidence is preferred. Only a near-terminal observation with ETA <=1 minute or distance <=100m is treated as confirmed enough to override an impossible next planned departure. Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes.",
+  "short_turn_rule": "A suspected short turn requires the same vehicle to be observed running in the reverse direction at least 20 minutes after departure. If that reverse observation occurs before 80% of the route/direction's same-day confirmed minimum full-trip runtime and the last same-direction observation is not near the terminal, it is classified as a suspected short turn. Missing progression alone is never sufficient."
+}
