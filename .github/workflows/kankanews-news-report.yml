@@ -41,7 +41,7 @@ jobs:
           fi
       - name: Commit collected data
         run: |
-          if git diff --quiet -- news-report/data; then
+          if [ -z "$(git status --porcelain -- news-report/data)" ]; then
             echo "No data changes to commit"
             exit 0
           fi
