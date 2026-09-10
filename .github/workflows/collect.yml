@@ -69,6 +69,18 @@ jobs:
             latest="data/shmaas/latest-${route}.json"
             if [ -f "$file" ]; then
               tail -n 1 "$file" > "/tmp/shmaas-new/${route}.jsonl"
+              if [ ! -s "/tmp/shmaas-new/${route}.jsonl" ]; then
+                echo "Empty saved sample for ${route}; refusing to persist a silent data loss."
+                exit 1
+              fi
+              python - "$route" "/tmp/shmaas-new/${route}.jsonl" <<'PY'
+import json, sys
+route, path = sys.argv[1], sys.argv[2]
+with open(path, encoding='utf-8') as f:
+    rec = json.loads(f.read())
+if rec.get('route') != route or not rec.get('sample_time_cst'):
+    raise SystemExit(f'invalid saved sample for {route}')
+PY
               found=1
             fi
             if [ -f "$latest" ]; then
@@ -93,6 +105,10 @@ jobs:
                 touch "$target"
                 record="$(cat "$saved")"
                 grep -Fqx -- "$record" "$target" || printf '%s\n' "$record" >> "$target"
+                if ! grep -Fqx -- "$record" "$target"; then
+                  echo "Persistence verification failed for ${route}."
+                  exit 1
+                fi
               fi
               latest_saved="/tmp/shmaas-new/latest-${route}.json"
               if [ -f "$latest_saved" ]; then
