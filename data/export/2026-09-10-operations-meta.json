@@ -13,17 +13,17 @@
     "182路": 58
   },
   "confidence": {
-    "A": 45,
-    "B": 5,
+    "A": 134,
+    "B": 18,
     "C": 3,
-    "D": 147
+    "D": 45
   },
   "service_types": {
-    "全程车": 89,
+    "全程车": 193,
     "疑似区间车": 4,
-    "运行异常待查": 107
+    "运行异常待查": 3
   },
   "ranking_rule": "Within-route ranking uses each vehicle's arithmetic mean of rank-eligible full-trip runtimes; lower mean runtime ranks faster. Rank is numeric only.",
-  "arrival_rule": "Terminal ETA evidence is preferred. Only a near-terminal observation with ETA <=1 minute or distance <=100m is treated as confirmed enough to override an impossible next planned departure. Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes.",
+  "arrival_rule": "Terminal ETA evidence is preferred. Terminal sampling gaps do not by themselves make a trip operationally abnormal; service type and arrival confidence are evaluated separately. Only a near-terminal observation with ETA <=1 minute or distance <=100m is treated as confirmed enough to override an impossible next planned departure. Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes.",
   "short_turn_rule": "A suspected short turn requires the same vehicle to be observed running in the reverse direction at least 20 minutes after departure. If that reverse observation occurs before 80% of the route/direction's same-day confirmed minimum full-trip runtime and the last same-direction observation is not near the terminal, it is classified as a suspected short turn. Missing progression alone is never sufficient."
 }
