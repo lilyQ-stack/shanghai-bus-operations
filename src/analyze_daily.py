@@ -126,6 +126,10 @@ def collect_evidence(snapshots):
                 dispatch = parse_hm(obs.get("dispatch_time"))
                 if role == "dispatch" and dispatch is not None:
                     dispatches[(route, plate, d)].add(dispatch)
+                    # A dispatch observation is a timetable/dispatch plan, not proof that the
+                    # vehicle is physically travelling in this direction at sample_time.
+                    # Keep it for trip boundaries only; never mix it into trajectory evidence.
+                    continue
                 eta = obs.get("eta_min")
                 try:
                     eta = float(eta) if eta is not None else None
@@ -321,8 +325,6 @@ def build_rows(date, route_info, events, dispatches, first_seen):
             if service_type in ("全程车", "运行中待确认"):
                 arrival, method, error, confirmed = terminal_eta(trip_events, terminal, stop_count)
 
-            # Only a truly confirmed near-terminal observation may override a planned departure that
-            # would otherwise make the trip impossible. Consensus/fallback ETA is not strong enough.
             if arrival is not None and confirmed and next_dep < dep + 240 and next_dep <= arrival:
                 arrival = next_dep - 2
                 method = "终点确认到达后按下班反向/同向发车边界校正"
@@ -358,92 +360,140 @@ def build_rows(date, route_info, events, dispatches, first_seen):
                 "参与车速排名": "是" if eligible else "否",
                 "最后可靠采集站点": last_stop,
                 "最后可靠预计到达时间": last_eta,
-                "本车首次观测": first_seen.get((route, plate), "").strftime("%H:%M") if first_seen.get((route, plate)) else "",
-                "方向": d,
+                "本车首次观测": first_seen.get((route, plate)).strftime("%H:%M") if first_seen.get((route, plate)) else "",
+                "_终点确认到达": confirmed,
             })
     return rows
 
 
-def add_rankings(rows):
-    eligible = defaultdict(list)
+def rank_rows(rows):
+    runtimes = defaultdict(list)
     for row in rows:
-        if row["参与车速排名"] == "是" and isinstance(row["全程时间（分钟）"], (int, float)):
-            eligible[(row["线路"], row["车牌号"])].append(float(row["全程时间（分钟）"]))
-    route_vehicle = defaultdict(list)
-    for (route, plate), values in eligible.items():
-        avg = sum(values) / len(values)
-        route_vehicle[route].append((avg, plate, len(values)))
-    rank_map = {}
-    for route, vals in route_vehicle.items():
-        vals.sort()
-        for rank, (avg, plate, count) in enumerate(vals, 1):
-            rank_map[(route, plate)] = (rank, count, round(avg, 1))
+        if row["参与车速排名"] == "是" and row["全程时间（分钟）"] != "":
+            runtimes[(row["线路"], row["车牌号"])].append(float(row["全程时间（分钟）"]))
+    averages = {key: sum(vals) / len(vals) for key, vals in runtimes.items() if vals}
+    ranks = {}
+    for route in ROUTES:
+        ordered = sorted((avg, plate) for (r, plate), avg in averages.items() if r == route)
+        for rank, (avg, plate) in enumerate(ordered, 1):
+            ranks[(route, plate)] = rank
     for row in rows:
-        rank, count, avg = rank_map.get((row["线路"], row["车牌号"]), ("", 0, ""))
-        row["当日车速排名"] = rank
-        row["当日计入排名班次"] = count if rank != "" else ""
-        row["当日平均全程时间（分钟）"] = avg
+        row["当日车速排名"] = ranks.get((row["线路"], row["车牌号"]), "")
+    return averages
 
 
-def write_csv(path, rows, fields):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8-sig") as f:
-        writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
-        writer.writeheader()
-        for row in rows:
-            writer.writerow({k: row.get(k, "") for k in fields})
+def write_csv(date, rows):
+    out_dir = ROOT / "data" / "export"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    csv_fields = FIELDS + ["当日车速排名"]
+    for route in ROUTES:
+        path = out_dir / f"{date}-{route}.csv"
+        with path.open("w", encoding="utf-8-sig", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=csv_fields, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows([r for r in rows if r["线路"] == route])
 
 
-def write_xlsx(path, rows, fields):
-    wb = Workbook(); wb.remove(wb.active)
-    yellow = PatternFill(fill_type="solid", fgColor="FFF2CC")
-    for name, subset in [("全部班次", rows)] + [(route, [r for r in rows if r["线路"] == route]) for route in ROUTES]:
-        ws = wb.create_sheet(name[:31]); visible = [f for f in fields if f != "方向"]; ws.append(visible)
+def write_xlsx(date, rows, averages):
+    out_dir = ROOT / "data" / "export"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / f"{date}-上海公交运营分析.xlsx"
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "汇总"
+    ws.append(["线路", "车辆数", "班次数", "可排名班次数", "最快车辆", "平均全程时间（分钟）"])
+    for route in ROUTES:
+        rr = [r for r in rows if r["线路"] == route]
+        plates = sorted({r["车牌号"] for r in rr})
+        eligible = [r for r in rr if r["参与车速排名"] == "是"]
+        ranked = sorted((avg, plate) for (r, plate), avg in averages.items() if r == route)
+        fastest = ranked[0][1] if ranked else ""
+        avg = ranked[0][0] if ranked else ""
+        ws.append([route, len(plates), len(rr), len(eligible), fastest, round(avg, 1) if avg != "" else ""])
+
+    headers = FIELDS + ["当日车速排名"]
+    yellow = PatternFill("solid", fgColor="FFF2CC")
+    for sheet_name, route_filter in [("全部班次", None)] + [(r, r) for r in ROUTES]:
+        sh = wb.create_sheet(sheet_name)
+        sh.append(headers)
+        subset = rows if route_filter is None else [r for r in rows if r["线路"] == route_filter]
         for row in subset:
-            ws.append([row.get(f, "") for f in visible])
-            if row.get("班次类型") == "运行异常待查":
-                for field in ("最后可靠采集站点", "最后可靠预计到达时间"):
-                    if field in visible:
-                        ws.cell(ws.max_row, visible.index(field) + 1).fill = yellow
-        ws.freeze_panes = "A2"; ws.auto_filter.ref = ws.dimensions
-        for col in ws.columns:
-            width = min(max(len(str(c.value or "")) for c in col) + 2, 40)
-            ws.column_dimensions[col[0].column_letter].width = width
-    path.parent.mkdir(parents=True, exist_ok=True); wb.save(path)
+            sh.append([row.get(h, "") for h in headers])
+            if row["班次类型"] != "全程车":
+                for cell in sh[sh.max_row]:
+                    cell.fill = yellow
+        sh.freeze_panes = "A2"
+        sh.auto_filter.ref = sh.dimensions
+        for col in sh.columns:
+            letter = col[0].column_letter
+            width = min(max(len(str(c.value or "")) for c in col) + 2, 42)
+            sh.column_dimensions[letter].width = max(width, 10)
+    wb.save(path)
+    return path
+
+
+def write_meta(date, snapshots, source_files, rows, averages):
+    out_dir = ROOT / "data" / "export"
+    path = out_dir / f"{date}-analysis-meta.json"
+    payload = {
+        "date": date,
+        "generated_at_cst": datetime.now(TZ).isoformat(timespec="seconds"),
+        "source": "SHMAAS anonymous public endpoints only",
+        "source_files": source_files,
+        "successful_snapshots": len(snapshots),
+        "rules": {
+            "short_turn": (
+                "A trip is flagged only when the same plate is observed in actual current/next trajectory evidence "
+                "in the reverse direction after at least 20 minutes and before the next same-direction planned departure. "
+                "Planned dispatch observations are excluded from trajectory/reverse evidence. "
+                "If a same-day minimum full-trip runtime exists, reverse must occur before 80% of it and before the vehicle reaches the route end segment. "
+                "Without a baseline, reverse must follow an intermediate last same-direction observation within 20 minutes."
+            ),
+            "arrival_rule": (
+                "Terminal ETA evidence is preferred. Only a near-terminal observation with ETA <=1 minute or distance <=100m "
+                "is treated as confirmed enough to override an impossible next planned departure. A terminal sampling gap by itself "
+                "does not make the service abnormal; service classification and arrival confidence are evaluated separately. "
+                "Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes."
+            ),
+            "ranking": (
+                "Within each route, arithmetic mean full-trip runtime per vehicle over eligible full trips; "
+                "lower runtime ranks faster. Short-turn/abnormal trips and D-confidence arrivals are excluded."
+            ),
+        },
+        "eligible_vehicle_average_runtime": {
+            f"{route}|{plate}": round(avg, 2) for (route, plate), avg in sorted(averages.items())
+        },
+        "row_count": len(rows),
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build Shanghai bus daily operations exports.")
-    parser.add_argument("--date", help="Shanghai service date to analyze (YYYY-MM-DD). Defaults to today in Asia/Shanghai.")
+    parser = argparse.ArgumentParser(description="Build daily SHMAAS-only bus operations exports.")
+    parser.add_argument("--date", help="Shanghai calendar date to analyze (YYYY-MM-DD). Defaults to today in Asia/Shanghai.")
     args = parser.parse_args()
     date = args.date or datetime.now(TZ).date().isoformat()
     try:
         datetime.strptime(date, "%Y-%m-%d")
     except ValueError as exc:
-        raise SystemExit(f"Invalid --date {date!r}; expected YYYY-MM-DD") from exc
-
+        parser.error(f"invalid --date {date!r}; expected YYYY-MM-DD")
     snapshots, source_files = load_snapshots(date)
     if not snapshots:
-        raise RuntimeError(f"No successful SHMAAS snapshots for {date}")
+        raise SystemExit(f"No successful SHMAAS snapshots found for {date}")
     route_info, events, dispatches, first_seen = collect_evidence(snapshots)
-    rows = build_rows(date, route_info, events, dispatches, first_seen); add_rankings(rows)
-    fields = FIELDS + ["当日车速排名", "当日计入排名班次", "当日平均全程时间（分钟）"]
-    export = ROOT / "data" / "export"
-    write_csv(export / f"{date}-operations.csv", rows, fields)
-    for route in ROUTES:
-        write_csv(export / f"{date}-{route}.csv", [r for r in rows if r["线路"] == route], [f for f in fields if f != "线路"])
-    write_xlsx(export / f"{date}-上海公交运营.xlsx", rows, fields)
-    meta = {
-        "date": date, "source_files": source_files, "successful_snapshots": len(snapshots), "trip_count": len(rows),
-        "routes": {route: sum(1 for r in rows if r["线路"] == route) for route in ROUTES},
-        "confidence": {grade: sum(1 for r in rows if r["到达置信度"] == grade) for grade in "ABCD"},
-        "service_types": dict((k, sum(1 for r in rows if r["班次类型"] == k)) for k in sorted({r["班次类型"] for r in rows})),
-        "ranking_rule": "Within-route ranking uses each vehicle's arithmetic mean of rank-eligible full-trip runtimes; lower mean runtime ranks faster. Rank is numeric only.",
-        "arrival_rule": "Terminal ETA evidence is preferred. Terminal sampling gaps do not by themselves make a trip operationally abnormal; service type and arrival confidence are evaluated separately. Only a near-terminal observation with ETA <=1 minute or distance <=100m is treated as confirmed enough to override an impossible next planned departure. Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes.",
-        "short_turn_rule": "A suspected short turn requires the same vehicle to be observed running in the reverse direction at least 20 minutes after departure. If that reverse observation occurs before 80% of the route/direction's same-day confirmed minimum full-trip runtime and the last same-direction observation is not near the terminal, it is classified as a suspected short turn. Missing progression alone is never sufficient.",
-    }
-    (export / f"{date}-operations-meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps(meta, ensure_ascii=False))
+    rows = build_rows(date, route_info, events, dispatches, first_seen)
+    averages = rank_rows(rows)
+    write_csv(date, rows)
+    xlsx = write_xlsx(date, rows, averages)
+    meta = write_meta(date, snapshots, source_files, rows, averages)
+    print(json.dumps({
+        "date": date,
+        "snapshots": len(snapshots),
+        "rows": len(rows),
+        "xlsx": str(xlsx.relative_to(ROOT)),
+        "meta": str(meta.relative_to(ROOT)),
+    }, ensure_ascii=False))
 
 
 if __name__ == "__main__":
