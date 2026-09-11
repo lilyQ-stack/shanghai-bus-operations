@@ -2,6 +2,7 @@ name: SHMAAS Combined Sampler
 
 on:
   workflow_dispatch:
+    inputs: {}
   schedule:
     # Fallback only: cron-job.org is the primary 10-minute trigger.
     # Shanghai 05:35-22:35, hourly at :35, deliberately offset from the external trigger.
