@@ -3,7 +3,8 @@ name: Daily Operations Analysis
 on:
   workflow_dispatch:
   schedule:
-    # Shanghai 23:00 daily (15:00 UTC)
+    # Intended for Shanghai 23:00 daily (15:00 UTC). GitHub scheduled runs may be delayed,
+    # so scheduled executions explicitly analyze the previous Shanghai calendar day.
     - cron: '0 15 * * *'
   push:
     branches: [main]
@@ -37,8 +38,20 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Resolve analysis date
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            target_date="$(TZ=Asia/Shanghai date -d 'yesterday' +%F)"
+          else
+            target_date="$(TZ=Asia/Shanghai date +%F)"
+          fi
+          echo "TARGET_DATE=${target_date}" >> "$GITHUB_ENV"
+          echo "Analyzing Shanghai service date ${target_date} (event=${GITHUB_EVENT_NAME})"
+
       - name: Build daily exports
-        run: python src/analyze_daily.py
+        run: python src/analyze_daily.py --date "$TARGET_DATE"
 
       - name: Commit daily exports
         shell: bash
@@ -46,7 +59,6 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          date_cst="$(TZ=Asia/Shanghai date +%F)"
 
           rm -rf /tmp/daily-export
           mkdir -p /tmp/daily-export
@@ -62,7 +74,7 @@ jobs:
               echo 'Daily export already current.'
               exit 0
             fi
-            git commit -m "data: publish ${date_cst} daily operations analysis"
+            git commit -m "data: publish ${TARGET_DATE} daily operations analysis"
             if git push origin HEAD:main; then
               exit 0
             fi
@@ -72,5 +84,3 @@ jobs:
             fi
             sleep $((attempt * 2))
           done
-
-# Manual checkpoint: 2026-09-10 intraday short-turn review.
