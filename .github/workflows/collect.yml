@@ -13,6 +13,7 @@ on:
     paths:
       - '.github/workflows/collect.yml'
       - 'src/shmaas_key_stop_sampler.py'
+      - 'src/shmaas_key_stop_sampler_safe.py'
 
 permissions:
   contents: write
@@ -44,7 +45,7 @@ jobs:
           failed=0
           for route in '浦东78路' '浦东35路' '182路'; do
             echo "=== Sampling ${route} ==="
-            python src/shmaas_key_stop_sampler.py --route "$route"
+            python src/shmaas_key_stop_sampler_safe.py --route "$route"
             rc=$?
             if [ "$rc" -ne 0 ]; then
               echo "Sampler failed for ${route} with rc=${rc}"
