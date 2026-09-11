@@ -11,6 +11,7 @@ on:
     paths:
       - '.github/workflows/daily-analysis.yml'
       - 'src/analyze_daily.py'
+      - 'src/analyze_daily_safe.py'
       - 'requirements.txt'
 
 permissions:
@@ -51,7 +52,7 @@ jobs:
           echo "Analyzing Shanghai service date ${target_date} (event=${GITHUB_EVENT_NAME})"
 
       - name: Build daily exports
-        run: python src/analyze_daily.py --date "$TARGET_DATE"
+        run: python src/analyze_daily_safe.py --date "$TARGET_DATE"
 
       - name: Commit daily exports
         shell: bash
@@ -84,5 +85,3 @@ jobs:
             fi
             sleep $((attempt * 2))
           done
-
-# Manual checkpoint: 2026-09-11 evening short-turn review.
