@@ -5,7 +5,7 @@
     "data/shmaas/2026-09-11-浦东35路.jsonl",
     "data/shmaas/2026-09-11-182路.jsonl"
   ],
-  "successful_snapshots": 138,
+  "successful_snapshots": 140,
   "trip_count": 131,
   "routes": {
     "浦东78路": 46,
@@ -13,16 +13,16 @@
     "182路": 42
   },
   "confidence": {
-    "A": 0,
-    "B": 0,
-    "C": 0,
-    "D": 131
+    "A": 33,
+    "B": 43,
+    "C": 7,
+    "D": 48
   },
   "service_types": {
     "全程车": 78,
-    "疑似区间车": 4,
+    "疑似区间车": 25,
     "运行中待确认": 8,
-    "运行异常待查": 41
+    "运行异常待查": 20
   },
   "ranking_rule": "Within-route ranking uses each vehicle's arithmetic mean of rank-eligible full-trip runtimes; lower mean runtime ranks faster. Rank is numeric only.",
   "arrival_rule": "Terminal ETA evidence is preferred. Terminal sampling gaps do not by themselves make a trip operationally abnormal; service type and arrival confidence are evaluated separately. Only a near-terminal observation with ETA <=1 minute or distance <=100m is treated as confirmed enough to override an impossible next planned departure. Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes.",
