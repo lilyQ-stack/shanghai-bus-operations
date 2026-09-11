@@ -75,13 +75,13 @@ jobs:
                 exit 1
               fi
               python - "$route" "/tmp/shmaas-new/${route}.jsonl" <<'PY'
-import json, sys
-route, path = sys.argv[1], sys.argv[2]
-with open(path, encoding='utf-8') as f:
-    rec = json.loads(f.read())
-if rec.get('route') != route or not rec.get('sample_time_cst'):
-    raise SystemExit(f'invalid saved sample for {route}')
-PY
+          import json, sys
+          route, path = sys.argv[1], sys.argv[2]
+          with open(path, encoding='utf-8') as f:
+              rec = json.loads(f.read())
+          if rec.get('route') != route or not rec.get('sample_time_cst'):
+              raise SystemExit(f'invalid saved sample for {route}')
+          PY
               found=1
             fi
             if [ -f "$latest" ]; then
