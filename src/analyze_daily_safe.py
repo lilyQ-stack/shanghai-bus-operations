@@ -76,11 +76,20 @@ def collect_evidence(snapshots):
             d = direction.get("direction")
             if d is None:
                 continue
-            route_info[(route, d)] = {
-                "start": direction.get("start_stop", ""),
-                "end": direction.get("end_stop", ""),
-                "stop_count": direction.get("stop_count") or 0,
-            }
+            key = (route, d)
+            info = route_info[key]
+            info["start"] = direction.get("start_stop", "") or info.get("start", "")
+            info["end"] = direction.get("end_stop", "") or info.get("end", "")
+            info["stop_count"] = direction.get("stop_count") or info.get("stop_count", 0)
+            stop_names = info.setdefault("stop_names", {})
+            for stop in direction.get("sampled_stops", []):
+                try:
+                    seq = int(stop.get("seq"))
+                except (TypeError, ValueError):
+                    continue
+                name = stop.get("stop_name") or ""
+                if name:
+                    stop_names[seq] = name
 
         for vehicle in snap.get("vehicles", []):
             plate = vehicle.get("plate")
@@ -112,11 +121,9 @@ def collect_evidence(snapshots):
                 remaining = parse_remaining_stops(obs.get("remaining_stops"))
                 vehicle_seq_est = None
                 if seq is not None and remaining is not None:
-                    # stop_seq identifies the queried stop, not the vehicle itself.
-                    # Subtracting remaining_stops gives a rough vehicle position on the
-                    # directional stop sequence. This is retained for future strict
-                    # trajectory validation; raw stop_seq alone must not be treated as a
-                    # physical vehicle position.
+                    # stop_seq is the queried target stop, not the vehicle position.
+                    # remaining_stops tells how many stops remain before that target, so
+                    # their difference reconstructs the vehicle's approximate sequence.
                     vehicle_seq_est = max(1, seq - remaining)
 
                 events[(route, plate, d)].append({
@@ -162,21 +169,116 @@ def derive_min_full_runtimes(route_info, events, dispatches):
     return {key: min(values) for key, values in candidates.items() if values}
 
 
-def trajectory_classification(route, plate, d, dep, next_dep, route_info, events, min_full):
-    """Classify conservatively from stop-centric SHMAAS ETA observations.
+def median_value(values):
+    values = sorted(values)
+    if not values:
+        return None
+    n = len(values)
+    if n % 2:
+        return float(values[n // 2])
+    return (values[n // 2 - 1] + values[n // 2]) / 2.0
 
-    current/next means the vehicle is predicted for a queried stop; it is not a
-    GPS position and must not by itself prove that the vehicle has reversed.
-    Until a strict position-series validator is added, inferred reverse-direction
-    observations may downgrade confidence but may not create a short-turn label.
+
+def trajectory_points(trip_events):
+    """Collapse stop-centric ETA rows into one reconstructed vehicle position per sample."""
+    grouped = defaultdict(list)
+    for ev in trip_events:
+        seq = ev.get("vehicle_seq_est")
+        if seq is not None:
+            grouped[round(ev["time"], 3)].append(float(seq))
+
+    points = []
+    for sample_time, seqs in sorted(grouped.items()):
+        # A healthy SHMAAS snapshot usually gives the same reconstructed position from
+        # every queried downstream stop. Allow tiny disagreement but reject incoherent rows.
+        if max(seqs) - min(seqs) > 2:
+            continue
+        points.append({"time": sample_time, "seq": median_value(seqs), "samples": len(seqs)})
+    return points
+
+
+def progressing(points, min_points=3, min_gain=4):
+    if len(points) < min_points:
+        return False
+    if points[-1]["seq"] - points[0]["seq"] < min_gain:
+        return False
+    drops = sum(1 for a, b in zip(points, points[1:]) if b["seq"] + 1 < a["seq"])
+    return drops <= 1
+
+
+def stop_name_for_seq(route_info, route, d, seq):
+    info = route_info.get((route, d), {}) or {}
+    names = info.get("stop_names") or {}
+    if not names or seq is None:
+        return ""
+    target = int(round(seq))
+    if target in names:
+        return names[target]
+    nearest = min(names, key=lambda x: abs(x - target))
+    return names.get(nearest, "")
+
+
+def physical_short_turn_evidence(route, plate, d, dep, next_dep, route_info, events):
+    """Return strong mid-route turnback evidence from reconstructed physical positions.
+
+    The key protection against false positives is temporal ordering: reverse-direction ETA
+    rows are ignored until after the final same-direction physical point. A short turn needs
+    a progressing same-direction trajectory, then a progressing reverse trajectory over at
+    least three distinct samples, with both trajectories meeting in roughly the same place.
     """
+    same_events = [e for e in events.get((route, plate, d), []) if dep <= e["time"] < next_dep]
+    same_points = trajectory_points(same_events)
+    if not progressing(same_points):
+        return None
+
+    same_count = (route_info.get((route, d), {}) or {}).get("stop_count") or 0
+    opp_count = (route_info.get((route, 1 - d), {}) or {}).get("stop_count") or 0
+    if same_count < 2 or opp_count < 2:
+        return None
+
+    last_same = same_points[-1]
+    same_fraction = (last_same["seq"] - 1) / (same_count - 1)
+    # A vehicle already in the last 15% is much more likely to be a normal terminal turn.
+    if same_fraction >= 0.85:
+        return None
+
+    opposite_events = [
+        e for e in events.get((route, plate, 1 - d), [])
+        if last_same["time"] < e["time"] < next_dep
+    ]
+    opposite_points = trajectory_points(opposite_events)
+    if not progressing(opposite_points):
+        return None
+
+    first_reverse = opposite_points[0]
+    gap = first_reverse["time"] - last_same["time"]
+    if gap < 0 or gap > 30:
+        return None
+
+    # Convert reverse-direction sequence back onto the original direction's 0..1 axis.
+    reverse_fraction_on_original = 1 - (first_reverse["seq"] - 1) / (opp_count - 1)
+    spatial_gap = abs(same_fraction - reverse_fraction_on_original)
+    if spatial_gap > 0.12:
+        return None
+
+    same_name = stop_name_for_seq(route_info, route, d, last_same["seq"])
+    reverse_name = stop_name_for_seq(route_info, route, 1 - d, first_reverse["seq"])
+    return {
+        "same_last": last_same,
+        "reverse_first": first_reverse,
+        "reverse_points": opposite_points,
+        "gap_min": gap,
+        "spatial_gap": spatial_gap,
+        "same_name": same_name,
+        "reverse_name": reverse_name,
+    }
+
+
+def trajectory_classification(route, plate, d, dep, next_dep, route_info, events, min_full):
+    """Classify using terminal evidence plus reconstructed physical trajectory continuity."""
     info = route_info.get((route, d), {})
     terminal = info.get("end") or ""
     same = [e for e in events.get((route, plate, d), []) if dep <= e["time"] < next_dep]
-    opposite = [
-        e for e in events.get((route, plate, 1 - d), [])
-        if dep + core.MIN_REVERSE_ELAPSED_MIN <= e["time"] < next_dep
-    ]
     if not same:
         return "运行异常待查", "发车后缺少同向到站预测证据", "", ""
 
@@ -197,9 +299,9 @@ def trajectory_classification(route, plate, d, dep, next_dep, route_info, events
         and (e["eta"] <= 5 or (e.get("distance") is not None and e["distance"] <= 1000))
     ]
 
-    # Repeated terminal ETA observations mean SHMAAS continues to project this
-    # plate through to the route terminal. That is stronger evidence of a full
-    # trip than a stray appearance in the opposite-direction ETA list.
+    # Repeated terminal ETA observations are strong full-trip evidence. Keep this check
+    # ahead of turnback inference; it specifically protects through-running trips such as
+    # a last departure that appears early in the opposite-direction prediction list.
     if len(terminal_sample_times) >= 2 or close_terminal:
         best = terminal_events[-1]
         predicted = best["time"] + best["eta"]
@@ -208,13 +310,39 @@ def trajectory_classification(route, plate, d, dep, next_dep, route_info, events
             if len(terminal_sample_times) >= 2
             else "已取得接近终点的同向ETA证据；按全程运行处理"
         )
-        return "全程车", reason, last.get("stop_name", ""), fmt_hm(predicted)
+        physical_points = trajectory_points(same)
+        last_name = (
+            stop_name_for_seq(route_info, route, d, physical_points[-1]["seq"])
+            if physical_points else last.get("stop_name", "")
+        )
+        return "全程车", reason, last_name, fmt_hm(predicted)
 
+    turn = physical_short_turn_evidence(route, plate, d, dep, next_dep, route_info, events)
+    if turn:
+        last_name = turn["same_name"] or last.get("stop_name", "")
+        reverse_name = turn["reverse_name"] or "附近"
+        reverse_count = len(turn["reverse_points"])
+        reason = (
+            f"同向实际位置连续推进至{last_name or '线路中段'}附近后停止；"
+            f"约{turn['gap_min']:.0f}分钟后在{reverse_name}附近形成反向连续轨迹"
+            f"（{reverse_count}个采样点），空间衔接符合中途折返"
+        )
+        return "疑似区间车", reason, last_name, ""
+
+    opposite = [
+        e for e in events.get((route, plate, 1 - d), [])
+        if dep + core.MIN_REVERSE_ELAPSED_MIN <= e["time"] < next_dep
+    ]
     if opposite:
+        physical_points = trajectory_points(same)
+        last_name = (
+            stop_name_for_seq(route_info, route, d, physical_points[-1]["seq"])
+            if physical_points else last.get("stop_name", "")
+        )
         return (
             "运行异常待查",
-            "反方向current/next属于站点到站预测，未形成可验证的实际折返轨迹；不判区间车",
-            last.get("stop_name", ""),
+            "出现反方向到站预测，但未满足连续位置、时间及空间衔接三项折返证据；不判区间车",
+            last_name,
             "",
         )
 
@@ -227,12 +355,16 @@ def trajectory_classification(route, plate, d, dep, next_dep, route_info, events
             fmt_hm(best["time"] + best["eta"]),
         )
 
-    return "运行中待确认", "尚未取得连续终点ETA或可靠折返轨迹证据", last.get("stop_name", ""), ""
+    physical_points = trajectory_points(same)
+    last_name = (
+        stop_name_for_seq(route_info, route, d, physical_points[-1]["seq"])
+        if physical_points else last.get("stop_name", "")
+    )
+    return "运行中待确认", "尚未取得连续终点ETA或可靠折返轨迹证据", last_name, ""
 
 
 # Patch the core module before entering its normal CLI/main flow. This keeps the
-# export format stable while correcting evidence normalization and conservative
-# service classification.
+# export format stable while correcting evidence normalization and service classification.
 core.fmt_hm = fmt_hm
 core.collect_evidence = collect_evidence
 core.derive_min_full_runtimes = derive_min_full_runtimes
