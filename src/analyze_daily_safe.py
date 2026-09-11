@@ -42,6 +42,13 @@ def parse_distance(value):
     return float(match.group(1)) if match else None
 
 
+def fmt_hm(value):
+    if value is None:
+        return ""
+    value = int(round(float(value))) % (24 * 60)
+    return f"{value // 60:02d}:{value % 60:02d}"
+
+
 def collect_evidence(snapshots):
     route_info = defaultdict(dict)
     events = defaultdict(list)
@@ -139,6 +146,7 @@ def derive_min_full_runtimes(route_info, events, dispatches):
 
 # Patch the core module before entering its normal CLI/main flow. This keeps the
 # export format stable while correcting evidence normalization and full-trip baselines.
+core.fmt_hm = fmt_hm
 core.collect_evidence = collect_evidence
 core.derive_min_full_runtimes = derive_min_full_runtimes
 
