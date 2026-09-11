@@ -1,134 +1,138 @@
 {
-  "sample_time_cst": "2026-09-11T21:51:30+08:00",
+  "sample_time_cst": "2026-09-11T22:30:34+08:00",
   "date_cst": "2026-09-11",
   "source": "https://api.shmaas.net",
   "route": "182路",
   "strategy": "rotating_every_5th_stop_plus_terminals",
-  "sampling_phase": 1,
+  "sampling_phase": 0,
   "sampling_stride": 5,
   "success": true,
   "requests": [
     {
       "endpoint": "querytrafficline",
-      "elapsed_ms": 1047
+      "elapsed_ms": 1185
     },
     {
       "endpoint": "querybusline",
       "direction": 0,
-      "elapsed_ms": 987
+      "elapsed_ms": 1147
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "start_143705",
-      "elapsed_ms": 1003
+      "probe_type": "rotating",
+      "elapsed_ms": 1138
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143706",
-      "elapsed_ms": 1020
+      "stop_id": "143707",
+      "probe_type": "rotating",
+      "elapsed_ms": 1177
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143708",
-      "elapsed_ms": 992
+      "stop_id": "143709",
+      "probe_type": "rotating",
+      "elapsed_ms": 1294
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143710",
-      "elapsed_ms": 1009
+      "stop_id": "143712",
+      "probe_type": "rotating",
+      "elapsed_ms": 1188
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143733",
-      "elapsed_ms": 1027
+      "stop_id": "143715",
+      "probe_type": "rotating",
+      "elapsed_ms": 1176
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143735",
-      "elapsed_ms": 1016
+      "stop_id": "143737",
+      "probe_type": "rotating",
+      "elapsed_ms": 1216
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143738",
-      "elapsed_ms": 1146
-    },
-    {
-      "endpoint": "getbusstoparrivedetails",
-      "direction": 0,
-      "stop_id": "143722",
-      "elapsed_ms": 990
+      "stop_id": "143721",
+      "probe_type": "rotating",
+      "elapsed_ms": 1217
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "143724",
-      "elapsed_ms": 956
+      "probe_type": "rotating",
+      "elapsed_ms": 1224
     },
     {
       "endpoint": "querybusline",
       "direction": 1,
-      "elapsed_ms": 942
+      "elapsed_ms": 1130
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "start_143740",
-      "elapsed_ms": 1005
+      "probe_type": "rotating",
+      "elapsed_ms": 1224
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143741",
-      "elapsed_ms": 1032
+      "stop_id": "143764",
+      "probe_type": "rotating",
+      "elapsed_ms": 1202
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143765",
-      "elapsed_ms": 1009
+      "stop_id": "143747",
+      "probe_type": "rotating",
+      "elapsed_ms": 1205
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143748",
-      "elapsed_ms": 1045
+      "stop_id": "143769",
+      "probe_type": "rotating",
+      "elapsed_ms": 1208
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143770",
-      "elapsed_ms": 993
+      "stop_id": "143752",
+      "probe_type": "rotating",
+      "elapsed_ms": 1254
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143753",
-      "elapsed_ms": 964
+      "stop_id": "143756",
+      "probe_type": "rotating",
+      "elapsed_ms": 1162
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143757",
-      "elapsed_ms": 1050
-    },
-    {
-      "endpoint": "getbusstoparrivedetails",
-      "direction": 1,
-      "stop_id": "143773",
-      "elapsed_ms": 1109
+      "stop_id": "143761",
+      "probe_type": "rotating",
+      "elapsed_ms": 1206
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "143763",
-      "elapsed_ms": 1095
+      "probe_type": "rotating",
+      "elapsed_ms": 1205
     }
   ],
   "directions": [
@@ -137,61 +141,63 @@
       "start_stop": "川沙客运站",
       "end_stop": "金杨路金口路",
       "stop_count": 35,
-      "sampled_stop_count": 9,
-      "sampling_phase": 1,
+      "sampled_stop_count": 8,
+      "sampling_phase": 0,
       "sampled_stops": [
         {
           "seq": 1,
           "stop_id": "start_143705",
           "stop_name": "川沙客运站",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 2,
-          "stop_id": "143706",
-          "stop_name": "川环南路妙境路",
+          "seq": 6,
+          "stop_id": "143707",
+          "stop_name": "新川路妙境路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 7,
-          "stop_id": "143708",
-          "stop_name": "新川路华城路",
+          "seq": 11,
+          "stop_id": "143709",
+          "stop_name": "新德西路德翔路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 12,
-          "stop_id": "143710",
-          "stop_name": "新德西路德川路",
+          "seq": 16,
+          "stop_id": "143712",
+          "stop_name": "唐陆公路唐镇路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 17,
-          "stop_id": "143733",
-          "stop_name": "唐陆公路唐龙路",
+          "seq": 21,
+          "stop_id": "143715",
+          "stop_name": "唐陆公路锦绣东路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 22,
-          "stop_id": "143735",
-          "stop_name": "唐陆公路台桥路",
+          "seq": 26,
+          "stop_id": "143737",
+          "stop_name": "佳林路金高路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 27,
-          "stop_id": "143738",
-          "stop_name": "博兴路凌河路",
-          "ok": true
-        },
-        {
-          "seq": 32,
-          "stop_id": "143722",
-          "stop_name": "金杨路金业路",
+          "seq": 31,
+          "stop_id": "143721",
+          "stop_name": "平度路长岛路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
           "seq": 35,
           "stop_id": "143724",
           "stop_name": "金杨路金口路",
+          "probe_type": "rotating",
           "ok": true
         }
       ]
@@ -201,181 +207,77 @@
       "start_stop": "金杨路金口路",
       "end_stop": "川沙客运站",
       "stop_count": 35,
-      "sampled_stop_count": 9,
-      "sampling_phase": 1,
+      "sampled_stop_count": 8,
+      "sampling_phase": 0,
       "sampled_stops": [
         {
           "seq": 1,
           "stop_id": "start_143740",
           "stop_name": "金杨路金口路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 2,
-          "stop_id": "143741",
-          "stop_name": "金杨路枣庄路",
+          "seq": 6,
+          "stop_id": "143764",
+          "stop_name": "长岛路台儿庄路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 7,
-          "stop_id": "143765",
-          "stop_name": "荷泽路长岛路",
+          "seq": 11,
+          "stop_id": "143747",
+          "stop_name": "东陆路金海路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 12,
-          "stop_id": "143748",
-          "stop_name": "东陆路新金桥路",
+          "seq": 16,
+          "stop_id": "143769",
+          "stop_name": "唐陆公路春雅路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 17,
-          "stop_id": "143770",
-          "stop_name": "唐陆公路顾家浜路",
+          "seq": 21,
+          "stop_id": "143752",
+          "stop_name": "唐陆公路创新路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 22,
-          "stop_id": "143753",
-          "stop_name": "唐陆公路南曹路",
+          "seq": 26,
+          "stop_id": "143756",
+          "stop_name": "华夏三路新德西路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 27,
-          "stop_id": "143757",
-          "stop_name": "华夏三路城丰路",
-          "ok": true
-        },
-        {
-          "seq": 32,
-          "stop_id": "143773",
-          "stop_name": "川沙路南桥路",
+          "seq": 31,
+          "stop_id": "143761",
+          "stop_name": "新川路川沙路",
+          "probe_type": "rotating",
           "ok": true
         },
         {
           "seq": 35,
           "stop_id": "143763",
           "stop_name": "川沙客运站",
+          "probe_type": "rotating",
           "ok": true
         }
       ]
     }
   ],
-  "vehicles": [
-    {
-      "plate": "沪A68397D",
-      "raw_values": [
-        "沪A68397D无障碍"
-      ],
-      "directions": [
-        1
-      ],
-      "roles": [
-        "current"
-      ],
-      "observations": [
-        {
-          "direction": 1,
-          "role": "current",
-          "stop_seq": 32,
-          "stop_id": "143773",
-          "stop_name": "川沙路南桥路",
-          "arrive_time": "1",
-          "distance": "203",
-          "remaining_stops": 1,
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "current",
-          "stop_seq": 35,
-          "stop_id": "143763",
-          "stop_name": "川沙客运站",
-          "arrive_time": "6",
-          "distance": "1801",
-          "remaining_stops": 4,
-          "service_hints": []
-        }
-      ],
-      "dispatch_times": []
-    },
-    {
-      "plate": "沪A68870D",
-      "raw_values": [
-        "沪A68870D无障碍"
-      ],
-      "directions": [
-        1
-      ],
-      "roles": [
-        "current",
-        "next"
-      ],
-      "observations": [
-        {
-          "direction": 1,
-          "role": "current",
-          "stop_seq": 17,
-          "stop_id": "143770",
-          "stop_name": "唐陆公路顾家浜路",
-          "arrive_time": "3",
-          "distance": "1467",
-          "remaining_stops": 2,
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "current",
-          "stop_seq": 22,
-          "stop_id": "143753",
-          "stop_name": "唐陆公路南曹路",
-          "arrive_time": "14",
-          "distance": "5191",
-          "remaining_stops": 7,
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "current",
-          "stop_seq": 27,
-          "stop_id": "143757",
-          "stop_name": "华夏三路城丰路",
-          "arrive_time": "24",
-          "distance": "8318",
-          "remaining_stops": 12,
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "next",
-          "stop_seq": 32,
-          "stop_id": "143773",
-          "stop_name": "川沙路南桥路",
-          "arrive_time": "34",
-          "distance": "10429",
-          "remaining_stops": "17",
-          "service_hints": []
-        },
-        {
-          "direction": 1,
-          "role": "next",
-          "stop_seq": 35,
-          "stop_id": "143763",
-          "stop_name": "川沙客运站",
-          "arrive_time": "40",
-          "distance": "12026",
-          "remaining_stops": "20",
-          "service_hints": []
-        }
-      ],
-      "dispatch_times": []
-    }
-  ],
+  "vehicles": [],
   "errors": [],
+  "tracking_errors": [],
+  "watch_candidates": [],
+  "tracking_probes": [],
   "line_id": "18200",
-  "unique_vehicle_count": 2,
-  "request_count": 21,
+  "unique_vehicle_count": 0,
+  "request_count": 19,
   "failed_sample_count": 0,
-  "avg_request_elapsed_ms": 1021,
-  "max_request_elapsed_ms": 1146
+  "avg_request_elapsed_ms": 1198,
+  "max_request_elapsed_ms": 1294
 }
