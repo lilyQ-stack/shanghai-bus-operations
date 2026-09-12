@@ -118,6 +118,47 @@ jobs:
               fi
             done
 
+            # Maintain a compact, query-friendly roster of every vehicle observed today.
+            # This is derived from the complete daily JSONL after rebasing, so it also
+            # backfills vehicles seen before this feature was introduced.
+            python - "$date_cst" <<'PY'
+          import csv, json, sys
+          from pathlib import Path
+
+          date = sys.argv[1]
+          root = Path('data/shmaas')
+          for route in ('浦东78路', '浦东35路', '182路'):
+              source = root / f'{date}-{route}.jsonl'
+              if not source.exists():
+                  continue
+              seen = {}
+              with source.open(encoding='utf-8') as f:
+                  for line in f:
+                      try:
+                          rec = json.loads(line)
+                      except json.JSONDecodeError:
+                          continue
+                      sample_time = rec.get('sample_time_cst') or ''
+                      for vehicle in rec.get('vehicles') or []:
+                          plate = vehicle.get('plate')
+                          if not plate:
+                              continue
+                          item = seen.setdefault(plate, {'first_seen': sample_time, 'last_seen': sample_time, 'movement_seen': False, 'dispatch_seen': False})
+                          if sample_time and (not item['first_seen'] or sample_time < item['first_seen']): item['first_seen'] = sample_time
+                          if sample_time and sample_time > item['last_seen']: item['last_seen'] = sample_time
+                          roles = set(vehicle.get('roles') or [])
+                          item['movement_seen'] = item['movement_seen'] or bool(roles & {'current', 'next'})
+                          item['dispatch_seen'] = item['dispatch_seen'] or ('dispatch' in roles)
+              out = root / f'{date}-{route}-vehicles.csv'
+              with out.open('w', encoding='utf-8-sig', newline='') as f:
+                  w = csv.writer(f)
+                  w.writerow(['线路','车牌号','首次观测','最后观测','已上线运行','出现待发'])
+                  for plate in sorted(seen):
+                      x = seen[plate]
+                      w.writerow([route, plate, x['first_seen'], x['last_seen'], '是' if x['movement_seen'] else '否', '是' if x['dispatch_seen'] else '否'])
+              print(f'roster {route}: {len(seen)} vehicles -> {out}')
+          PY
+
             git add data/shmaas
             if git diff --cached --quiet; then
               echo 'Samples already present.'
