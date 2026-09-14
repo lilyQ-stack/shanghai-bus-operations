@@ -10,7 +10,7 @@ import shmaas_key_stop_sampler as api
 
 ROUTE = "浦东35路"
 CST = api.CST
-MISS_COUNT = 3
+MISS_COUNT = 1
 START_OFFSET = 3
 CONFIRM_GAIN = 5
 TERMINAL_GUARD = 0.85
@@ -47,10 +47,7 @@ def vehicle_positions(snapshot: dict, plate: str, direction: int) -> list[float]
 
 
 def plates(snapshot: dict) -> set[str]:
-    return {
-        v.get("plate") for v in snapshot.get("vehicles") or []
-        if v.get("plate")
-    }
+    return {v.get("plate") for v in snapshot.get("vehicles") or [] if v.get("plate")}
 
 
 def stop_counts(snapshot: dict) -> dict[int, int]:
@@ -111,10 +108,10 @@ def find_active_watches(snapshots: list[dict]) -> list[dict]:
                 continue
             if len(snapshots) - last_idx - 1 < MISS_COUNT:
                 continue
-            # Exactly the new trigger: the first three main samples after the last
-            # same-direction observation contain no same-direction movement evidence.
-            next_three = snapshots[last_idx + 1:last_idx + 1 + MISS_COUNT]
-            if any(vehicle_positions(s, plate, direction) for s in next_three):
+            # Trigger immediately after the first main sample that no longer contains
+            # same-direction movement evidence for this vehicle.
+            next_samples = snapshots[last_idx + 1:last_idx + 1 + MISS_COUNT]
+            if any(vehicle_positions(s, plate, direction) for s in next_samples):
                 continue
             count = counts.get(direction) or 0
             if count < 2:
@@ -216,7 +213,7 @@ def run(date: str, root: Path):
         "sample_time_cst": now.isoformat(timespec="seconds"),
         "date_cst": date,
         "route": ROUTE,
-        "rule_version": "3miss-reverse+3-gain5-v1",
+        "rule_version": "1miss-reverse+3-gain5-v2",
         "watches": [],
     }
 
