@@ -1,18 +1,22 @@
 {
   "date_cst": "2026-09-15",
-  "generated_at_cst": "2026-09-15T03:35:49+08:00",
+  "generated_at_cst": "2026-09-15T07:59:07+08:00",
   "provisional": true,
   "analysis_rule_version": "1miss-reverse+3-gain5-v2",
   "semantics": "Pudong35 short-turn labels start reverse tracking after the first missed main sample; probes run every 5 minutes from mirrored reverse position +3 stops and confirm after at least 5 stops of reverse progress. Explicit official short-turn service hints remain authoritative.",
-  "sources": [],
+  "sources": [
+    "data/shmaas/2026-09-15-浦东78路.jsonl",
+    "data/shmaas/2026-09-15-浦东35路.jsonl",
+    "data/shmaas/2026-09-15-182路.jsonl"
+  ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": null,
+      "cutoff_cst": "2026-09-15T07:50:25+08:00",
       "candidate_count": 0,
       "candidates": []
     },
     "浦东35路": {
-      "cutoff_cst": null,
+      "cutoff_cst": "2026-09-15T07:50:59+08:00",
       "candidate_count": 0,
       "candidates": []
     }
