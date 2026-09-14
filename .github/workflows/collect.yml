@@ -170,11 +170,13 @@ jobs:
 
             python - "$date_cst" <<'PY'
           import csv, json, sys
+          from datetime import datetime, timezone, timedelta
           from pathlib import Path
 
           date = sys.argv[1]
           root = Path('data/shmaas')
-          for route in ('浦东78路', '浦东35路', '182路'):
+          routes = ('浦东78路', '浦东35路', '182路')
+          for route in routes:
               source = root / f'{date}-{route}.jsonl'
               if not source.exists():
                   continue
@@ -204,6 +206,36 @@ jobs:
                       x = seen[plate]
                       w.writerow([route, plate, x['first_seen'], x['last_seen'], '是' if x['movement_seen'] else '否', '是' if x['dispatch_seen'] else '否'])
               print(f'roster {route}: {len(seen)} vehicles -> {out}')
+
+          CST = timezone(timedelta(hours=8))
+          now = datetime.now(CST)
+          health = {
+              'generated_at_cst': now.isoformat(timespec='seconds'),
+              'stale_after_minutes': 15,
+              'routes': {},
+          }
+          for route in routes:
+              latest_path = root / f'latest-{route}.json'
+              item = {'latest_sample_time_cst': None, 'age_minutes': None, 'status': 'missing'}
+              if latest_path.exists():
+                  try:
+                      rec = json.loads(latest_path.read_text(encoding='utf-8'))
+                      text = rec.get('sample_time_cst')
+                      if text:
+                          dt = datetime.fromisoformat(text).astimezone(CST)
+                          age = max(0.0, (now - dt).total_seconds() / 60)
+                          item = {
+                              'latest_sample_time_cst': dt.isoformat(timespec='seconds'),
+                              'age_minutes': round(age, 1),
+                              'status': 'healthy' if age <= 15 else 'stale',
+                          }
+                  except Exception as exc:
+                      item['error'] = str(exc)
+              health['routes'][route] = item
+          health['overall_status'] = 'healthy' if all(x['status'] == 'healthy' for x in health['routes'].values()) else 'stale'
+          health_path = root / 'collection-health.json'
+          health_path.write_text(json.dumps(health, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(f'health -> {health_path}: {health["overall_status"]}')
           PY
 
             git add data/shmaas
