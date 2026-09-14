@@ -10,6 +10,7 @@ on:
     paths:
       - '.github/workflows/reverse-watch.yml'
       - 'src/reverse_watch_sampler.py'
+      - 'src/reverse_watch_runner.py'
 
 permissions:
   contents: write
@@ -38,7 +39,7 @@ jobs:
         run: |
           set -euo pipefail
           date_cst="$(TZ=Asia/Shanghai date +%F)"
-          python src/reverse_watch_sampler.py --date "$date_cst"
+          python src/reverse_watch_runner.py --date "$date_cst"
 
       - name: Persist reverse-watch sample
         shell: bash
@@ -49,6 +50,10 @@ jobs:
           date_cst="$(TZ=Asia/Shanghai date +%F)"
           file="data/shmaas/${date_cst}-浦东35路-reverse-watch.jsonl"
 
+          if git diff --quiet -- "$file" 2>/dev/null; then
+            echo 'No new reverse-watch record.'
+            exit 0
+          fi
           if [ ! -s "$file" ]; then
             echo 'No reverse-watch output to persist.'
             exit 0
