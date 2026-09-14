@@ -11,8 +11,7 @@ on:
   schedule:
     # GitHub cron resets each hour, so */8 would create a 4-minute gap from :56 to :00.
     # Wake every 4 minutes and let the cadence gate below run a real sample only when
-    # the previous persisted main sample is at least 7 minutes old. This maintains an
-    # approximately 8-minute cadence across hour boundaries.
+    # the previous persisted main sample is at least 7 minutes old.
     - cron: '*/4 21-23,0-15 * * *'
   push:
     branches: [main]
@@ -54,14 +53,12 @@ jobs:
 
           if [ "$GITHUB_EVENT_NAME" = "push" ]; then
             should_sample=true
-          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            # The former cron-job.org trigger called workflow_dispatch without inputs.
-            # Ignore those legacy no-input dispatches so they cannot disturb the new
-            # 8-minute cadence. Manual callers can explicitly set force=true.
-            if [ "${FORCE_INPUT:-false}" = "true" ]; then
-              should_sample=true
-            fi
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "${FORCE_INPUT:-false}" = "true" ]; then
+            should_sample=true
           else
+            # Scheduled wakes and legacy external workflow_dispatch calls both use
+            # the same age gate. This keeps the external trigger as a reliability
+            # fallback instead of silently disabling collection when GitHub cron is delayed.
             latest='data/shmaas/latest-浦东35路.json'
             if [ ! -s "$latest" ]; then
               should_sample=true
