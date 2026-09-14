@@ -3,7 +3,7 @@ name: Rolling Short-Turn Analysis
 on:
   workflow_dispatch:
   schedule:
-    # Shanghai 05:45-22:45, hourly. Keep this independent from the 10-minute sampler.
+    # Shanghai 05:45-22:45, hourly fallback.
     - cron: '45 21-23,0-14 * * *'
   push:
     branches: [main]
@@ -12,6 +12,10 @@ on:
       - 'src/analyze_rolling.py'
       - 'src/analyze_daily_safe.py'
       - 'src/analyze_daily.py'
+      - 'src/analyze_daily_rule_v4.py'
+      # Primary trigger: refresh whenever either the main sampler or
+      # Pudong35 reverse-watch writes new SHMAAS evidence.
+      - 'data/shmaas/**'
 
 permissions:
   contents: write
