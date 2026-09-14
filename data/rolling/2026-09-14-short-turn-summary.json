@@ -1,0 +1,41 @@
+{
+  "date_cst": "2026-09-14",
+  "generated_at_cst": "2026-09-14T14:52:05+08:00",
+  "provisional": true,
+  "analysis_rule_version": "trajectory-v3",
+  "semantics": "Only trips already satisfying strict reconstructed-trajectory reversal evidence are listed; unfinished trips are not short-turns by absence alone.",
+  "sources": [
+    "data/shmaas/2026-09-14-浦东78路.jsonl",
+    "data/shmaas/2026-09-14-浦东35路.jsonl",
+    "data/shmaas/2026-09-14-182路.jsonl"
+  ],
+  "routes": {
+    "浦东78路": {
+      "cutoff_cst": "2026-09-14T14:50:27+08:00",
+      "candidate_count": 0,
+      "candidates": []
+    },
+    "浦东35路": {
+      "cutoff_cst": "2026-09-14T14:50:53+08:00",
+      "candidate_count": 2,
+      "candidates": [
+        {
+          "plate": "沪A62981D",
+          "departure": "07:12",
+          "origin": "康恩路康浦路",
+          "destination": "东高路张杨北路",
+          "reason": "同向实际位置连续推进至沪南路高科西路附近后停止；约10分钟后在浦建路锦绣路附近形成反向连续轨迹（8个采样点），空间衔接符合中途折返",
+          "last_reliable_stop": "沪南路高科西路"
+        },
+        {
+          "plate": "沪A79307D",
+          "departure": "12:30",
+          "origin": "康恩路康浦路",
+          "destination": "东高路张杨北路",
+          "reason": "同向实际位置连续推进至沪南路高科西路附近后停止；约20分钟后在浦建路锦绣路附近形成反向连续轨迹（6个采样点），空间衔接符合中途折返",
+          "last_reliable_stop": "沪南路高科西路"
+        }
+      ]
+    }
+  }
+}
