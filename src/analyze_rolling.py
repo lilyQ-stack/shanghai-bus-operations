@@ -7,9 +7,9 @@ from datetime import datetime
 from pathlib import Path
 
 # Rule v4 keeps the safe trajectory normalization from v3, but short-turn labeling
-# now requires the dedicated reverse watcher: 3 consecutive main-sample misses,
-# start probing at mirrored reverse position +3 stops every 5 minutes, confirm at
-# >=5 stops of reverse progress.
+# now requires the dedicated reverse watcher: after the first missed main sample,
+# start probing at mirrored reverse position +3 stops every 5 minutes and confirm
+# after >=5 stops of reverse progress.
 import analyze_daily_rule4 as rule4
 
 core = rule4.core
@@ -75,7 +75,7 @@ def main():
         "generated_at_cst": now_cst.isoformat(timespec="seconds"),
         "provisional": True,
         "analysis_rule_version": rule4.RULE_VERSION,
-        "semantics": "Pudong35 short-turn labels require three consecutive main-sample misses followed by targeted reverse probes every 5 minutes and confirmed reverse progress of at least 5 stops; explicit official short-turn service hints remain authoritative.",
+        "semantics": "Pudong35 short-turn labels start reverse tracking after the first missed main sample; probes run every 5 minutes from mirrored reverse position +3 stops and confirm after at least 5 stops of reverse progress. Explicit official short-turn service hints remain authoritative.",
         "sources": source_files,
         "routes": {},
     }
