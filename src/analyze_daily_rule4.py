@@ -7,7 +7,7 @@ import analyze_daily_safe as v3
 
 core = v3.core
 ROOT = Path(__file__).resolve().parents[1]
-RULE_VERSION = "3miss-reverse+3-gain5-v1"
+RULE_VERSION = "1miss-reverse+3-gain5-v2"
 
 
 def load_reverse_confirmations(date: str) -> list[dict]:
@@ -49,7 +49,6 @@ def confirmed_external_turn(route, plate, direction, dep, events):
 def trajectory_classification(route, plate, d, dep, next_dep, route_info, events, min_full):
     same = [e for e in events.get((route, plate, d), []) if dep <= e["time"] < next_dep]
 
-    # Keep explicit official service hints authoritative.
     if same:
         hint_type, hint_text = core.explicit_service_hint(same)
         if hint_type:
@@ -64,7 +63,7 @@ def trajectory_classification(route, plate, d, dep, next_dep, route_info, events
         missing = external.get("missing_main_samples")
         target = external.get("target_stop") or "反向追踪站"
         reason = (
-            f"同向连续{missing or 3}次主采样未再发现该车后启动定向反向追踪；"
+            f"同向出现后下一次主采样即未再发现该车，立即启动定向反向追踪；"
             f"从最后位置反向+3站开始每5分钟采集，在{target}方向确认反向推进{gain:.0f}站，"
             f"达到≥5站区间车判据"
         )
@@ -72,13 +71,10 @@ def trajectory_classification(route, plate, d, dep, next_dep, route_info, events
 
     result = v3.trajectory_classification(route, plate, d, dep, next_dep, route_info, events, min_full)
 
-    # Rule v4: legacy reconstructed reverse trajectories may raise suspicion, but they
-    # are no longer sufficient by themselves to label a short turn. This removes the
-    # former 30-minute/time-gap and 12%-spatial-gap decision path from final labeling.
     if result[0] == "疑似区间车" and not str(result[1]).startswith("实时服务提示："):
         return (
             "运行异常待查",
-            "旧轨迹模型发现疑似折返信号，但新规则要求：同向连续3次未采到后启动5分钟定向反向追踪，并确认反向推进≥5站；当前尚未取得该确认",
+            "旧轨迹模型发现疑似折返信号，但新规则要求：同向下一次主采样未再发现该车后立即启动5分钟定向反向追踪，并确认反向推进≥5站；当前尚未取得该确认",
             result[2],
             "",
         )
