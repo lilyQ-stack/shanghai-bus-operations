@@ -4,10 +4,8 @@ on:
   workflow_dispatch:
   schedule:
     # Rolling intraday analysis, Shanghai 06:15-22:15 every hour.
-    # These runs analyze the current Shanghai service date and make suspected
-    # short turns queryable before the end-of-day report.
     - cron: '15 22-23,0-14 * * *'
-    # Final daily run at Shanghai 23:00. It analyzes the current Shanghai date.
+    # Final daily run at Shanghai 23:00.
     - cron: '0 15 * * *'
   push:
     branches: [main]
@@ -15,6 +13,8 @@ on:
       - '.github/workflows/daily-analysis.yml'
       - 'src/analyze_daily.py'
       - 'src/analyze_daily_safe.py'
+      - 'src/analyze_daily_rule4.py'
+      - 'src/reverse_watch_sampler.py'
       - 'requirements.txt'
 
 permissions:
@@ -51,7 +51,7 @@ jobs:
           echo "Analyzing Shanghai service date ${target_date} (event=${GITHUB_EVENT_NAME})"
 
       - name: Build daily exports
-        run: python src/analyze_daily_safe.py --date "$TARGET_DATE"
+        run: python src/analyze_daily_rule4.py --date "$TARGET_DATE"
 
       - name: Commit daily exports
         shell: bash
