@@ -3,7 +3,7 @@ name: Pudong35 Reverse Watch
 on:
   workflow_dispatch:
   schedule:
-    # Every 5 minutes during Shanghai 05:00-23:55.
+    # Primary cadence: every 5 minutes during Shanghai 05:00-23:55.
     - cron: '*/5 21-23,0-15 * * *'
   push:
     branches: [main]
@@ -11,6 +11,10 @@ on:
       - '.github/workflows/reverse-watch.yml'
       - 'src/reverse_watch_sampler.py'
       - 'src/reverse_watch_runner.py'
+      # Reliability fallback: every new Pudong35 main-sampler record starts
+      # a reverse-watch pass too. This pattern deliberately excludes the
+      # *-浦东35路-reverse-watch.jsonl output, so it cannot self-trigger.
+      - 'data/shmaas/*-浦东35路.jsonl'
 
 permissions:
   contents: write
