@@ -42,8 +42,19 @@ def plates_by_direction(snapshot: dict) -> dict[int, set[str]]:
     return result
 
 
+def no_legacy_immediate_watch(history, current, stop_counts):
+    """Disable the old one-miss reverse follow-up.
+
+    Pudong35 reverse tracking is now handled by reverse_watch_sampler.py:
+    trigger only after three consecutive main samples miss the same-direction
+    vehicle, then probe the mirrored reverse position +3 stops every 5 minutes.
+    """
+    return []
+
+
 core.observation_max_seq = observation_max_seq
 core.plates_by_direction = plates_by_direction
+core.build_watch_candidates = no_legacy_immediate_watch
 
 if __name__ == "__main__":
     raise SystemExit(core.main())
