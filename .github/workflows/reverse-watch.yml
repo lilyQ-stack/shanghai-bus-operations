@@ -1,0 +1,74 @@
+name: Pudong35 Reverse Watch
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 5 minutes during Shanghai 05:00-23:55.
+    - cron: '*/5 21-23,0-15 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pudong35-reverse-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run targeted reverse watch
+        shell: bash
+        run: |
+          set -euo pipefail
+          date_cst="$(TZ=Asia/Shanghai date +%F)"
+          python src/reverse_watch_sampler.py --date "$date_cst"
+
+      - name: Persist reverse-watch sample
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          date_cst="$(TZ=Asia/Shanghai date +%F)"
+          file="data/shmaas/${date_cst}-浦东35路-reverse-watch.jsonl"
+
+          if [ ! -s "$file" ]; then
+            echo 'No reverse-watch output to persist.'
+            exit 0
+          fi
+
+          tail -n 1 "$file" > /tmp/reverse-watch-last.jsonl
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p data/shmaas
+            touch "$file"
+            record="$(cat /tmp/reverse-watch-last.jsonl)"
+            grep -Fqx -- "$record" "$file" || printf '%s\n' "$record" >> "$file"
+            git add "$file"
+            if git diff --cached --quiet; then
+              echo 'Reverse-watch sample already present.'
+              break
+            fi
+            git commit -m 'data: persist Pudong35 reverse-watch sample'
+            if git push origin HEAD:main; then
+              break
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              echo 'Failed to push reverse-watch sample after retries.'
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
