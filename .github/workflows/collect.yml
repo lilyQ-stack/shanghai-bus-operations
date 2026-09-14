@@ -2,12 +2,18 @@ name: SHMAAS Combined Sampler
 
 on:
   workflow_dispatch:
-    inputs: {}
+    inputs:
+      force:
+        description: 'Force an immediate main sample'
+        required: false
+        default: false
+        type: boolean
   schedule:
-    # Fallback only: cron-job.org is the primary 10-minute trigger.
-    # Shanghai 05:35-22:35, hourly at :35, deliberately offset from the external trigger.
-    - cron: '35 21-23,0-13 * * *'
-    - cron: '35 14 * * *'
+    # GitHub cron resets each hour, so */8 would create a 4-minute gap from :56 to :00.
+    # Wake every 4 minutes and let the cadence gate below run a real sample only when
+    # the previous persisted main sample is at least 7 minutes old. This maintains an
+    # approximately 8-minute cadence across hour boundaries.
+    - cron: '*/4 21-23,0-15 * * *'
   push:
     branches: [main]
     paths:
@@ -37,7 +43,53 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Enforce 8-minute main-sample cadence
+        id: cadence
+        shell: bash
+        env:
+          FORCE_INPUT: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          should_sample=false
+
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            should_sample=true
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            # The former cron-job.org trigger called workflow_dispatch without inputs.
+            # Ignore those legacy no-input dispatches so they cannot disturb the new
+            # 8-minute cadence. Manual callers can explicitly set force=true.
+            if [ "${FORCE_INPUT:-false}" = "true" ]; then
+              should_sample=true
+            fi
+          else
+            latest='data/shmaas/latest-浦东35路.json'
+            if [ ! -s "$latest" ]; then
+              should_sample=true
+            else
+              should_sample="$(python - "$latest" <<'PY'
+          import json, sys
+          from datetime import datetime, timezone, timedelta
+
+          CST = timezone(timedelta(hours=8))
+          try:
+              with open(sys.argv[1], encoding='utf-8') as f:
+                  rec = json.load(f)
+              last = datetime.fromisoformat(rec['sample_time_cst']).astimezone(CST)
+              now = datetime.now(CST)
+              age = (now - last).total_seconds()
+              print('true' if age >= 420 else 'false')
+          except Exception:
+              print('true')
+          PY
+          )"
+            fi
+          fi
+
+          echo "should_sample=${should_sample}" >> "$GITHUB_OUTPUT"
+          echo "event=${GITHUB_EVENT_NAME} should_sample=${should_sample}"
+
       - name: Sample all routes sequentially
+        if: steps.cadence.outputs.should_sample == 'true'
         id: sample
         shell: bash
         run: |
@@ -56,6 +108,7 @@ jobs:
           exit 0
 
       - name: Preserve samples in one commit
+        if: steps.cadence.outputs.should_sample == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -118,9 +171,6 @@ jobs:
               fi
             done
 
-            # Maintain a compact, query-friendly roster of every vehicle observed today.
-            # This is derived from the complete daily JSONL after rebasing, so it also
-            # backfills vehicles seen before this feature was introduced.
             python - "$date_cst" <<'PY'
           import csv, json, sys
           from pathlib import Path
@@ -176,7 +226,7 @@ jobs:
           done
 
       - name: Fail if any route sampler failed
-        if: steps.sample.outputs.failed == '1'
+        if: steps.cadence.outputs.should_sample == 'true' && steps.sample.outputs.failed == '1'
         run: |
           echo 'At least one route returned sampling errors; successful samples were preserved.'
           exit 1
