@@ -6,12 +6,13 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-# Importing the safe module patches analyze_daily's evidence collection and
-# trajectory classifier with trajectory-v3.  Keep one source of truth for
-# final and rolling classification rules.
-import analyze_daily_safe as safe
+# Rule v4 keeps the safe trajectory normalization from v3, but short-turn labeling
+# now requires the dedicated reverse watcher: 3 consecutive main-sample misses,
+# start probing at mirrored reverse position +3 stops every 5 minutes, confirm at
+# >=5 stops of reverse progress.
+import analyze_daily_rule4 as rule4
 
-core = safe.core
+core = rule4.core
 ROOT = Path(__file__).resolve().parents[1]
 ROLLING_ROUTES = ("浦东78路", "浦东35路")
 CSV_FIELDS = [
@@ -51,7 +52,7 @@ def write_csv(path, rows, cutoff):
                 "本车首次观测": row.get("本车首次观测", ""),
                 "截至时间": cutoff.strftime("%Y-%m-%d %H:%M:%S") if cutoff else "",
                 "临时结果": "是",
-                "判定规则版本": "trajectory-v3",
+                "判定规则版本": rule4.RULE_VERSION,
             })
 
 
@@ -73,8 +74,8 @@ def main():
         "date_cst": date,
         "generated_at_cst": now_cst.isoformat(timespec="seconds"),
         "provisional": True,
-        "analysis_rule_version": "trajectory-v3",
-        "semantics": "Only trips already satisfying strict reconstructed-trajectory reversal evidence are listed; unfinished trips are not short-turns by absence alone.",
+        "analysis_rule_version": rule4.RULE_VERSION,
+        "semantics": "Pudong35 short-turn labels require three consecutive main-sample misses followed by targeted reverse probes every 5 minutes and confirmed reverse progress of at least 5 stops; explicit official short-turn service hints remain authoritative.",
         "sources": source_files,
         "routes": {},
     }
@@ -103,7 +104,7 @@ def main():
                 for row in candidates
             ],
         }
-        print(f"rolling {route}: {len(candidates)} strict short-turn candidate(s) -> {csv_path.relative_to(ROOT)}")
+        print(f"rolling {route}: {len(candidates)} short-turn candidate(s) -> {csv_path.relative_to(ROOT)}")
 
     summary_path = out_dir / f"{date}-short-turn-summary.json"
     with summary_path.open("w", encoding="utf-8") as f:
