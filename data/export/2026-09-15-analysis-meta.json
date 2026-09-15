@@ -1,18 +1,38 @@
 {
   "date": "2026-09-15",
-  "generated_at_cst": "2026-09-15T03:45:43+08:00",
+  "generated_at_cst": "2026-09-15T08:34:32+08:00",
   "source": "SHMAAS anonymous public endpoints only",
   "source_files": [
     "data/shmaas/2026-09-15-浦东78路.jsonl",
     "data/shmaas/2026-09-15-浦东35路.jsonl",
     "data/shmaas/2026-09-15-182路.jsonl"
   ],
-  "successful_snapshots": 3,
+  "successful_snapshots": 51,
   "rules": {
     "short_turn": "A trip is flagged only when the same plate is observed in actual current/next trajectory evidence in the reverse direction after at least 20 minutes and before the next same-direction planned departure. Planned dispatch observations are excluded from trajectory/reverse evidence. If a same-day minimum full-trip runtime exists, reverse must occur before 80% of it and before the vehicle reaches the route end segment. Without a baseline, reverse must follow an intermediate last same-direction observation within 20 minutes.",
     "arrival_rule": "Terminal ETA evidence is preferred. Only a near-terminal observation with ETA <=1 minute or distance <=100m is treated as confirmed enough to override an impossible next planned departure. A terminal sampling gap by itself does not make the service abnormal; service classification and arrival confidence are evaluated separately. Confidence A/B/C/D corresponds to estimated uncertainty <=5, <=10, <=15, >15 or insufficient minutes.",
     "ranking": "Within each route, arithmetic mean full-trip runtime per vehicle over eligible full trips; lower runtime ranks faster. Short-turn/abnormal trips and D-confidence arrivals are excluded."
   },
-  "eligible_vehicle_average_runtime": {},
-  "row_count": 0
+  "eligible_vehicle_average_runtime": {
+    "182路|沪A08953A": 81.8,
+    "182路|沪A35717D": 98.5,
+    "182路|沪A55712D": 81.55,
+    "182路|沪A66513D": 84.7,
+    "182路|沪A67026D": 82.2,
+    "182路|沪A67353D": 94.6,
+    "182路|沪A67983D": 83.9,
+    "182路|沪A68397D": 71.6,
+    "182路|沪A68870D": 86.6,
+    "浦东35路|沪A05218D": 133.9,
+    "浦东35路|沪A09172D": 137.5,
+    "浦东35路|沪A95621D": 143.4,
+    "浦东78路|沪A35172D": 102.0,
+    "浦东78路|沪A35591D": 91.4,
+    "浦东78路|沪A36809D": 88.5,
+    "浦东78路|沪A51173D": 103.4,
+    "浦东78路|沪A52736D": 75.0,
+    "浦东78路|沪A56630D": 94.0,
+    "浦东78路|沪A57022D": 99.4
+  },
+  "row_count": 82
 }
