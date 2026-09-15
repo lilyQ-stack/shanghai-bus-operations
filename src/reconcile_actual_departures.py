@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 from collections import defaultdict
@@ -42,7 +43,10 @@ def recalc_duration(row: dict, date: str):
 
 
 def main() -> int:
-    date = datetime.now(TZ).date().isoformat()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--date")
+    args = ap.parse_args()
+    date = args.date or datetime.now(TZ).date().isoformat()
     export = ROOT / "data" / "export"
     combined = export / f"{date}-operations.csv"
     if not combined.exists():
