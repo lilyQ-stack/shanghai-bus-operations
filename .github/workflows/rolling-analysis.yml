@@ -3,8 +3,10 @@ name: Rolling Short-Turn Analysis
 on:
   workflow_dispatch:
   schedule:
-    # Shanghai 05:45-22:45, hourly fallback.
-    - cron: '45 21-23,0-14 * * *'
+    # Reliable independent fallback: refresh every 10 minutes during Shanghai 05:00-23:59.
+    # Data commits made with GITHUB_TOKEN do not reliably trigger another push workflow,
+    # so rolling analysis must not depend on sampler-generated push events.
+    - cron: '*/10 21-23,0-15 * * *'
   push:
     branches: [main]
     paths:
@@ -13,8 +15,6 @@ on:
       - 'src/analyze_daily_safe.py'
       - 'src/analyze_daily.py'
       - 'src/analyze_daily_rule_v4.py'
-      # Primary trigger: refresh whenever either the main sampler or
-      # Pudong35 reverse-watch writes new SHMAAS evidence.
       - 'data/shmaas/**'
 
 permissions:
