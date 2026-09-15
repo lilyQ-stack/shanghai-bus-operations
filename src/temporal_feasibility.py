@@ -5,15 +5,13 @@ import re
 import statistics
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
-TZ = ZoneInfo("Asia/Shanghai")
 MIN_HISTORY_SAMPLES = 5
 LOW_QUANTILE = 0.10
 MIN_TURNAROUND_MIN = 2.0
 SAFETY_MARGIN_MIN = 5.0
+MIN_PROGRESS_FRACTION = 0.05
 
 
 @dataclass(frozen=True)
@@ -77,10 +75,74 @@ def load_history_bounds(export_dir: Path, before_date: str, route: str) -> dict[
         if len(samples) < MIN_HISTORY_SAMPLES:
             continue
         s = sorted(samples)
-        # Conservative empirical lower bound: 10th percentile, not the single fastest outlier.
         idx = max(0, min(len(s) - 1, int((len(s) - 1) * LOW_QUANTILE)))
         out[key] = DirectionBound(route, key, len(s), s[idx], statistics.median(s))
     return out
+
+
+def progress_fraction(seq: float | int, stop_count: int) -> float | None:
+    """Fraction of a route already travelled at a reconstructed physical stop sequence."""
+    try:
+        seq = float(seq); stop_count = int(stop_count)
+    except (TypeError, ValueError):
+        return None
+    if stop_count < 2 or seq < 1 or seq > stop_count:
+        return None
+    return max(0.0, min(1.0, (seq - 1.0) / (stop_count - 1.0)))
+
+
+def partial_normal_lower_bound(
+    *,
+    outbound: DirectionBound,
+    reverse: DirectionBound,
+    outbound_last_seq: float | int,
+    outbound_stop_count: int,
+    reverse_observed_seq: float | int,
+    reverse_stop_count: int,
+) -> tuple[float, str] | None:
+    """Earliest credible time from an outbound physical position to a reverse position.
+
+    Uses route-progress fractions against empirical low-quantile full-trip durations.
+    This is intentionally conservative and is not a timetable model. It is only a
+    physical-impossibility detector. Callers must pass reconstructed physical seq,
+    never the queried stop_seq from a stop-centric ETA row.
+    """
+    p_out = progress_fraction(outbound_last_seq, outbound_stop_count)
+    p_rev = progress_fraction(reverse_observed_seq, reverse_stop_count)
+    if p_out is None or p_rev is None or p_rev < MIN_PROGRESS_FRACTION:
+        return None
+    remaining_out = (1.0 - p_out) * outbound.lower_full_trip_min
+    travelled_reverse = p_rev * reverse.lower_full_trip_min
+    bound = remaining_out + MIN_TURNAROUND_MIN + travelled_reverse
+    note = (
+        f"从原方向物理进度{p_out:.1%}到终点至少约{remaining_out:.1f}分 + "
+        f"终点最短停站{MIN_TURNAROUND_MIN:.0f}分 + 反向物理进度{p_rev:.1%}至少约{travelled_reverse:.1f}分"
+        f" = {bound:.1f}分（历史低10%全程：{outbound.lower_full_trip_min:.1f}/{reverse.lower_full_trip_min:.1f}分，"
+        f"样本n={outbound.samples}/{reverse.samples}）"
+    )
+    return bound, note
+
+
+def impossible_partial_transition(
+    *,
+    elapsed_min: float,
+    outbound: DirectionBound,
+    reverse: DirectionBound,
+    outbound_last_seq: float | int,
+    outbound_stop_count: int,
+    reverse_observed_seq: float | int,
+    reverse_stop_count: int,
+) -> tuple[bool, str]:
+    result = partial_normal_lower_bound(
+        outbound=outbound, reverse=reverse,
+        outbound_last_seq=outbound_last_seq, outbound_stop_count=outbound_stop_count,
+        reverse_observed_seq=reverse_observed_seq, reverse_stop_count=reverse_stop_count,
+    )
+    if result is None:
+        return False, "物理位置或历史样本不足，不能形成时空不可能性证据"
+    bound, detail = result
+    impossible = elapsed_min + SAFETY_MARGIN_MIN < bound
+    return impossible, f"{detail}；两次物理观测实际间隔{elapsed_min:.1f}分，安全余量{SAFETY_MARGIN_MIN:.0f}分"
 
 
 def normal_roundtrip_lower_bound(outbound: DirectionBound, reverse: DirectionBound) -> float:
