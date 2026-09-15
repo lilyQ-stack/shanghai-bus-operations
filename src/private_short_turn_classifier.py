@@ -1,23 +1,24 @@
 from __future__ import annotations
 
-"""Private-pipeline short-turn classification core.
+"""Short-turn classification core for the private-pipeline migration.
 
-The mature private rule remains the primary classifier:
-  intermediate last same-direction running observation -> opposite running reappearance,
-  with no reliable same-direction terminal ETA.
+Current operational rule:
+  * no hard elapsed-time window;
+  * if the vehicle disappears while still inside the first 80% of its source trip,
+    it becomes a reverse-tracking candidate immediately;
+  * once reconstructed reverse physical position advances >=2 stops from the first
+    credible reverse physical point, classify as 疑似区间车.
 
-Public trajectory-v3/reverse-watch are deliberately not authoritative here.
-Two safety additions are isolated and auditable:
-  1) reliable terminal ETA is a hard full-trip guard;
-  2) temporal-impossibility evidence can supplement the private rule, but its lower
-     bound must be learned from credible route history (never a hard-coded 2.5 h).
+Reliable same-direction terminal ETA remains the hard full-trip guard.  A learned
+spatiotemporal-impossibility check remains supplemental evidence only.
 """
 
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable, Iterable
 
-PRIVATE_REAPPEAR_WINDOW_MIN = 20
+SOURCE_PROGRESS_LIMIT = 0.80
+REVERSE_CONFIRM_GAIN_STOPS = 2
 
 
 @dataclass(frozen=True)
@@ -38,45 +39,58 @@ class Classification:
     evidence: str
 
 
-def _seq(value) -> int:
+def physical_seq(e: Event) -> int | None:
     try:
-        return int(value or 0)
+        if e.remaining_stops is None:
+            return None
+        return max(1, int(e.stop_seq) - int(e.remaining_stops))
     except (TypeError, ValueError):
-        return 0
+        return None
 
 
-def private_reversal_evidence(
+def progress(seq: int, stop_count: int) -> float | None:
+    if stop_count < 2 or seq < 1 or seq > stop_count:
+        return None
+    return (seq - 1) / (stop_count - 1)
+
+
+def reverse_progress_evidence(
     events: Iterable[Event],
     direction: int,
     dep_dt: datetime,
-    end_stop: str,
     stop_count: int,
     terminal_eta_confirmed: bool,
 ) -> Classification | None:
-    """Exact private-style reversal rule, with terminal ETA protection first."""
     if terminal_eta_confirmed:
         return None
-    moving = [
-        e for e in events
-        if e.time >= dep_dt and e.role in {"current", "next"} and e.arrive_minutes is not None
-    ]
-    same = [e for e in moving if e.direction == direction]
-    opposite = [e for e in moving if e.direction != direction]
-    if not same or not opposite:
+
+    moving = [e for e in events if e.time >= dep_dt and e.role in {"current", "next"}]
+    source = [(e, physical_seq(e)) for e in moving if e.direction == direction]
+    source = [(e, seq) for e, seq in source if seq is not None]
+    if not source:
         return None
-    first_opp = min(opposite, key=lambda e: e.time)
-    last_same = max((e for e in same if e.time < first_opp.time), key=lambda e: e.time, default=None)
-    if last_same is None:
+
+    last_source, last_source_seq = max(source, key=lambda x: x[0].time)
+    source_fraction = progress(last_source_seq, stop_count)
+    if source_fraction is None or source_fraction >= SOURCE_PROGRESS_LIMIT:
         return None
-    gap = (first_opp.time - last_same.time).total_seconds() / 60
-    intermediate = last_same.stop_name != end_stop and not (stop_count and _seq(last_same.stop_seq) == stop_count)
-    if not intermediate or gap < 0 or gap > PRIVATE_REAPPEAR_WINDOW_MIN:
+
+    reverse = [(e, physical_seq(e)) for e in moving if e.direction != direction and e.time > last_source.time]
+    reverse = [(e, seq) for e, seq in reverse if seq is not None]
+    if not reverse:
         return None
-    where = last_same.stop_name or str(last_same.stop_seq or "未知站")
+
+    reverse.sort(key=lambda x: x[0].time)
+    first_seq = reverse[0][1]
+    max_seq = max(seq for _, seq in reverse)
+    gain = max_seq - first_seq
+    if gain < REVERSE_CONFIRM_GAIN_STOPS:
+        return None
+
     return Classification(
         "疑似区间车",
-        f"同车原方向末次运行观测在中途站{where}，未见终点ETA，{round(gap)}分钟后反方向重新出现",
-        "private_reversal",
+        f"原方向在全程{source_fraction:.0%}处后消失；随后反向物理轨迹由seq{first_seq}推进至seq{max_seq}，推进{gain}站，达到≥{REVERSE_CONFIRM_GAIN_STOPS}站确认条件",
+        "reverse_physical_progress",
     )
 
 
@@ -90,27 +104,16 @@ def classify_short_turn(
     terminal_eta_confirmed: bool,
     temporal_impossibility: Callable[[], tuple[bool, str]] | None = None,
 ) -> Classification:
-    """Final migration classifier entry point.
-
-    Priority is intentionally simple:
-      terminal ETA guard > private reversal evidence > learned temporal impossibility > full trip.
-    """
     if terminal_eta_confirmed:
         return Classification("全程车", "已取得可靠同向线路终点ETA，按全程车保护", "terminal_eta_guard")
 
-    private_hit = private_reversal_evidence(
-        events, direction, dep_dt, end_stop, stop_count, terminal_eta_confirmed=False
-    )
-    if private_hit:
-        return private_hit
+    reverse_hit = reverse_progress_evidence(events, direction, dep_dt, stop_count, False)
+    if reverse_hit:
+        return reverse_hit
 
     if temporal_impossibility is not None:
         impossible, note = temporal_impossibility()
         if impossible:
-            return Classification(
-                "疑似区间车",
-                f"正常跑完全程后再折返在时间上不可实现：{note}",
-                "temporal_impossibility",
-            )
+            return Classification("疑似区间车", f"正常跑完全程后再折返在时间上不可实现：{note}", "temporal_impossibility")
 
-    return Classification("全程车", "未发现private中途折返证据或可靠时空矛盾", "no_short_turn_evidence")
+    return Classification("全程车", "未形成反向≥2站物理推进证据或可靠时空矛盾", "no_short_turn_evidence")
