@@ -91,13 +91,14 @@ def median_consensus(predictions):
     if spread>15:return None
     return datetime.fromtimestamp(med,TZ),max(5,round(spread/2))
 
-def promote_existing_terminal_evidence(row):
-    if row.get("班次类型")=="疑似区间车":return False
+def existing_terminal_evidence(row):
     method=row.get("到达估算方法","");confidence=row.get("到达置信度","");arrival=row.get("预计到达时间","")
-    proven=(method=="终点ETA多样本共识" and confidence in {"A","B"} and bool(arrival)) or (method=="接近终点ETA" and confidence=="A" and bool(arrival))
-    if not proven:return False
-    row["班次类型"]="全程车";row["区间/异常说明"]="已有可靠同向终点ETA证据；分类与终到证据统一为全程车";row["参与车速排名"]="是"
-    return True
+    return (method=="终点ETA多样本共识" and confidence in {"A","B"} and bool(arrival)) or (method=="接近终点ETA" and confidence=="A" and bool(arrival))
+
+def set_full_trip(row,reason=None):
+    row["班次类型"]="全程车"
+    if reason:row["区间/异常说明"]=reason
+    row["参与车速排名"]="是"
 
 def apply(date,rows,route_info,events):
     by_vehicle=defaultdict(list)
@@ -105,10 +106,18 @@ def apply(date,rows,route_info,events):
         dep=parse_dt(date,row.get("发车时间",""))
         if dep:by_vehicle[(row.get("线路",""),row.get("车牌号",""))].append((dep,row))
     for seq in by_vehicle.values():seq.sort(key=lambda x:x[0])
-    promoted=0
+    refreshed_full=0;promoted_waiting=0;promoted_anomaly=0;new_terminal_promotions=0
     for row in rows:
-        if row.get("班次类型")=="疑似区间车":continue
-        if promote_existing_terminal_evidence(row):promoted+=1;continue
+        original_class=row.get("班次类型","")
+        if original_class=="疑似区间车":continue
+        if existing_terminal_evidence(row):
+            if original_class=="全程车":
+                refreshed_full+=1
+            else:
+                set_full_trip(row,"已有可靠同向终点ETA证据；分类与终到证据统一为全程车")
+                if original_class=="运行中待确认":promoted_waiting+=1
+                elif original_class=="运行异常待查":promoted_anomaly+=1
+            continue
         route,plate=row.get("线路",""),row.get("车牌号","");direction=infer_direction(route,row,route_info)
         if direction is None:continue
         dep=parse_dt(date,row.get("发车时间",""))
@@ -119,8 +128,12 @@ def apply(date,rows,route_info,events):
         if consensus or close:
             if consensus:arrival,err=consensus;method="终点ETA多样本共识"
             else:e=close[-1];arrival=e["time"]+timedelta(minutes=e["eta"]);err=5;method="接近终点ETA"
-            row["班次类型"]="全程车";row["区间/异常说明"]="同向终点ETA形成可靠证据；按全程运行处理";row["预计到达时间"]=arrival.strftime("%H:%M");row["全程时间（分钟）"]=f"{(arrival-dep).total_seconds()/60:.1f}";row["到达置信度"]="A" if err<=5 else "B";row["到达估算方法"]=method;row["参与车速排名"]="是";promoted+=1
-    print(f"terminal evidence promoted {promoted} rows to full trip")
+            set_full_trip(row,"同向终点ETA形成可靠证据；按全程运行处理")
+            row["预计到达时间"]=arrival.strftime("%H:%M");row["全程时间（分钟）"]=f"{(arrival-dep).total_seconds()/60:.1f}";row["到达置信度"]="A" if err<=5 else "B";row["到达估算方法"]=method
+            new_terminal_promotions+=1
+            if original_class=="运行中待确认":promoted_waiting+=1
+            elif original_class=="运行异常待查":promoted_anomaly+=1
+    print(f"terminal evidence audit: refreshed_existing_full={refreshed_full}, promoted_waiting={promoted_waiting}, promoted_anomaly={promoted_anomaly}, newly_proven_by_raw_terminal_eta={new_terminal_promotions}")
     return rows
 
 def main():
