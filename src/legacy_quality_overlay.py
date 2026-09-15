@@ -5,6 +5,7 @@ from datetime import datetime,timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 ROOT=Path(__file__).resolve().parents[1];TZ=ZoneInfo("Asia/Shanghai");MAX_TRIP_MIN=240;REVISION_WINDOW_MIN=20
+ROUTES=["浦东78路","浦东35路","182路"]
 
 def parse_dt(date,hm):
     try:return datetime.fromisoformat(f"{date}T{hm}:00+08:00").astimezone(TZ)
@@ -38,8 +39,7 @@ def load_raw(date):
                     except Exception:continue
                     role=str(obs.get("role") or "");dispatch=str(obs.get("dispatch_time") or "").strip()
                     if role=="dispatch" and dispatch:
-                        sightings[(route,plate,direction)][dispatch].append(captured)
-                        continue
+                        sightings[(route,plate,direction)][dispatch].append(captured);continue
                     if role not in {"current","next"}:continue
                     try:eta=float(obs.get("eta_min",obs.get("arrive_time")))
                     except Exception:eta=None
@@ -66,10 +66,8 @@ def row_evidence_score(row):
 def dedupe(rows,date,sightings,route_info):
     groups=defaultdict(list)
     for row in rows:
-        route=row.get("线路","")
-        direction=infer_direction(route,row,route_info)
-        key=(route,row.get("车牌号",""),direction,row.get("发车站",""),row.get("终点站",""))
-        groups[key].append(row)
+        route=row.get("线路","");direction=infer_direction(route,row,route_info)
+        key=(route,row.get("车牌号",""),direction,row.get("发车站",""),row.get("终点站",""));groups[key].append(row)
     kept=[];removed=0
     for key,group in groups.items():
         route,plate,direction,_,_=key;ordered=sorted(group,key=lambda r:r.get("发车时间",""));clusters=[]
@@ -99,19 +97,6 @@ def apply(date,rows,route_info,events):
         dep=parse_dt(date,row.get("发车时间",""))
         if dep:by_vehicle[(row.get("线路",""),row.get("车牌号",""))].append((dep,row))
     for seq in by_vehicle.values():seq.sort(key=lambda x:x[0])
-    history=defaultdict(list)
-    for path in sorted((ROOT/"data"/"export").glob("????-??-??-operations.csv")):
-        hdate=path.name[:10]
-        if hdate>=date:continue
-        try:hrows=read_csv(path)
-        except Exception:continue
-        for row in hrows:
-            if row.get("班次类型")!="全程车":continue
-            dep=parse_dt(hdate,row.get("发车时间",""));arr=parse_dt(hdate,row.get("预计到达时间",row.get("到达时间","")))
-            if dep and arr:
-                if arr<dep:arr+=timedelta(days=1)
-                mins=(arr-dep).total_seconds()/60
-                if 30<=mins<=MAX_TRIP_MIN:history[(row.get("线路",""),row.get("车牌号",""),row.get("发车站",""),row.get("终点站",""))].append(mins)
     for row in rows:
         if row.get("班次类型")=="疑似区间车":continue
         route,plate=row.get("线路",""),row.get("车牌号","");direction=infer_direction(route,row,route_info)
@@ -124,21 +109,29 @@ def apply(date,rows,route_info,events):
         if consensus or close:
             if consensus:arrival,err=consensus;method="终点ETA多样本共识"
             else:e=close[-1];arrival=e["time"]+timedelta(minutes=e["eta"]);err=5;method="接近终点ETA"
-            row["班次类型"]="全程车";row["区间/异常说明"]="同向终点ETA形成可靠证据；按全程运行处理";row["预计到达时间"]=arrival.strftime("%H:%M");row["全程时间（分钟）"]=f"{(arrival-dep).total_seconds()/60:.1f}";row["到达置信度"]="A" if err<=5 else "B";row["到达估算方法"]=method;row["参与车速排名"]="是";continue
-        if row.get("班次类型") in {"全程车","运行中待确认"} and not row.get("预计到达时间"):
-            vals=history.get((route,plate,row.get("发车站",""),row.get("终点站","")),[])
-            if len(vals)>=2:
-                med=statistics.median(vals);spread=max(vals)-min(vals)
-                if spread<=30:
-                    arrival=dep+timedelta(minutes=med);row["预计到达时间"]=arrival.strftime("%H:%M");row["全程时间（分钟）"]=f"{med:.1f}";row["到达置信度"]="B" if spread<=20 else "C";row["到达估算方法"]="同车历史全程时间";row["参与车速排名"]="是"
+            row["班次类型"]="全程车";row["区间/异常说明"]="同向终点ETA形成可靠证据；按全程运行处理";row["预计到达时间"]=arrival.strftime("%H:%M");row["全程时间（分钟）"]=f"{(arrival-dep).total_seconds()/60:.1f}";row["到达置信度"]="A" if err<=5 else "B";row["到达估算方法"]=method;row["参与车速排名"]="是"
     return rows
 
 def main():
     import argparse
-    parser=argparse.ArgumentParser();parser.add_argument("--date");args=parser.parse_args();date=args.date or datetime.now(TZ).strftime("%Y-%m-%d");export=ROOT/"data"/"export";combined=export/f"{date}-operations.csv"
-    if not combined.exists():return 0
-    rows=read_csv(combined);route_info,events,sightings=load_raw(date);rows=dedupe(rows,date,sightings,route_info);rows=apply(date,rows,route_info,events);fields=list(rows[0].keys()) if rows else [];write_csv(combined,rows,fields);by_route=defaultdict(list)
+    parser=argparse.ArgumentParser();parser.add_argument("--date");args=parser.parse_args();date=args.date or datetime.now(TZ).strftime("%Y-%m-%d");export=ROOT/"data"/"export"
+    rows=[];fields=None
+    for route in ROUTES:
+        path=export/f"{date}-{route}.csv"
+        if not path.exists():continue
+        route_rows=read_csv(path)
+        if route_rows and fields is None:fields=list(route_rows[0].keys())
+        for row in route_rows:
+            row["线路"]=route
+            rows.append(row)
+    if not rows:
+        print(f"legacy quality overlay: no per-route exports found for {date}");return 0
+    print(f"legacy quality overlay: loaded {len(rows)} per-route rows")
+    route_info,events,sightings=load_raw(date);rows=dedupe(rows,date,sightings,route_info);rows=apply(date,rows,route_info,events)
+    by_route=defaultdict(list)
     for row in rows:by_route[row.get("线路","")].append(row)
-    for route,route_rows in by_route.items():write_csv(export/f"{date}-{route.replace('/','_')}.csv",route_rows,[f for f in fields if f!="线路"])
-    print(f"legacy quality overlay: {len(rows)} trips");return 0
+    out_fields=fields or []
+    for route in ROUTES:
+        path=export/f"{date}-{route}.csv";write_csv(path,by_route.get(route,[]),out_fields)
+    print(f"legacy quality overlay: wrote {len(rows)} trips after dedupe");return 0
 if __name__=="__main__":raise SystemExit(main())
