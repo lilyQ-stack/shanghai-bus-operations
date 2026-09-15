@@ -91,14 +91,24 @@ def median_consensus(predictions):
     if spread>15:return None
     return datetime.fromtimestamp(med,TZ),max(5,round(spread/2))
 
+def promote_existing_terminal_evidence(row):
+    if row.get("班次类型")=="疑似区间车":return False
+    method=row.get("到达估算方法","");confidence=row.get("到达置信度","");arrival=row.get("预计到达时间","")
+    proven=(method=="终点ETA多样本共识" and confidence in {"A","B"} and bool(arrival)) or (method=="接近终点ETA" and confidence=="A" and bool(arrival))
+    if not proven:return False
+    row["班次类型"]="全程车";row["区间/异常说明"]="已有可靠同向终点ETA证据；分类与终到证据统一为全程车";row["参与车速排名"]="是"
+    return True
+
 def apply(date,rows,route_info,events):
     by_vehicle=defaultdict(list)
     for row in rows:
         dep=parse_dt(date,row.get("发车时间",""))
         if dep:by_vehicle[(row.get("线路",""),row.get("车牌号",""))].append((dep,row))
     for seq in by_vehicle.values():seq.sort(key=lambda x:x[0])
+    promoted=0
     for row in rows:
         if row.get("班次类型")=="疑似区间车":continue
+        if promote_existing_terminal_evidence(row):promoted+=1;continue
         route,plate=row.get("线路",""),row.get("车牌号","");direction=infer_direction(route,row,route_info)
         if direction is None:continue
         dep=parse_dt(date,row.get("发车时间",""))
@@ -109,7 +119,8 @@ def apply(date,rows,route_info,events):
         if consensus or close:
             if consensus:arrival,err=consensus;method="终点ETA多样本共识"
             else:e=close[-1];arrival=e["time"]+timedelta(minutes=e["eta"]);err=5;method="接近终点ETA"
-            row["班次类型"]="全程车";row["区间/异常说明"]="同向终点ETA形成可靠证据；按全程运行处理";row["预计到达时间"]=arrival.strftime("%H:%M");row["全程时间（分钟）"]=f"{(arrival-dep).total_seconds()/60:.1f}";row["到达置信度"]="A" if err<=5 else "B";row["到达估算方法"]=method;row["参与车速排名"]="是"
+            row["班次类型"]="全程车";row["区间/异常说明"]="同向终点ETA形成可靠证据；按全程运行处理";row["预计到达时间"]=arrival.strftime("%H:%M");row["全程时间（分钟）"]=f"{(arrival-dep).total_seconds()/60:.1f}";row["到达置信度"]="A" if err<=5 else "B";row["到达估算方法"]=method;row["参与车速排名"]="是";promoted+=1
+    print(f"terminal evidence promoted {promoted} rows to full trip")
     return rows
 
 def main():
@@ -122,8 +133,7 @@ def main():
         route_rows=read_csv(path)
         if route_rows and fields is None:fields=list(route_rows[0].keys())
         for row in route_rows:
-            row["线路"]=route
-            rows.append(row)
+            row["线路"]=route;rows.append(row)
     if not rows:
         print(f"legacy quality overlay: no per-route exports found for {date}");return 0
     print(f"legacy quality overlay: loaded {len(rows)} per-route rows")
@@ -131,7 +141,6 @@ def main():
     by_route=defaultdict(list)
     for row in rows:by_route[row.get("线路","")].append(row)
     out_fields=fields or []
-    for route in ROUTES:
-        path=export/f"{date}-{route}.csv";write_csv(path,by_route.get(route,[]),out_fields)
+    for route in ROUTES:write_csv(export/f"{date}-{route}.csv",by_route.get(route,[]),out_fields)
     print(f"legacy quality overlay: wrote {len(rows)} trips after dedupe");return 0
 if __name__=="__main__":raise SystemExit(main())
