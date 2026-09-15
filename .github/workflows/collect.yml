@@ -9,9 +9,6 @@ on:
         default: false
         type: boolean
   schedule:
-    # GitHub cron resets each hour, so */8 would create a 4-minute gap from :56 to :00.
-    # Wake every 4 minutes and let the cadence gate below run a real sample only when
-    # the previous persisted main sample is at least 7 minutes old.
     - cron: '*/4 21-23,0-15 * * *'
   push:
     branches: [main]
@@ -19,6 +16,7 @@ on:
       - '.github/workflows/collect.yml'
       - 'src/shmaas_key_stop_sampler.py'
       - 'src/shmaas_key_stop_sampler_safe.py'
+      - 'src/reverse_watch_sampler.py'
 
 permissions:
   contents: write
@@ -50,15 +48,11 @@ jobs:
         run: |
           set -euo pipefail
           should_sample=false
-
           if [ "$GITHUB_EVENT_NAME" = "push" ]; then
             should_sample=true
           elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "${FORCE_INPUT:-false}" = "true" ]; then
             should_sample=true
           else
-            # Scheduled wakes and legacy external workflow_dispatch calls both use
-            # the same age gate. This keeps the external trigger as a reliability
-            # fallback instead of silently disabling collection when GitHub cron is delayed.
             latest='data/shmaas/latest-浦东35路.json'
             if [ ! -s "$latest" ]; then
               should_sample=true
@@ -66,22 +60,17 @@ jobs:
               should_sample="$(python - "$latest" <<'PY'
           import json, sys
           from datetime import datetime, timezone, timedelta
-
           CST = timezone(timedelta(hours=8))
           try:
-              with open(sys.argv[1], encoding='utf-8') as f:
-                  rec = json.load(f)
+              with open(sys.argv[1], encoding='utf-8') as f: rec = json.load(f)
               last = datetime.fromisoformat(rec['sample_time_cst']).astimezone(CST)
-              now = datetime.now(CST)
-              age = (now - last).total_seconds()
+              age = (datetime.now(CST) - last).total_seconds()
               print('true' if age >= 420 else 'false')
-          except Exception:
-              print('true')
+          except Exception: print('true')
           PY
           )"
             fi
           fi
-
           echo "should_sample=${should_sample}" >> "$GITHUB_OUTPUT"
           echo "event=${GITHUB_EVENT_NAME} should_sample=${should_sample}"
 
@@ -96,12 +85,21 @@ jobs:
             echo "=== Sampling ${route} ==="
             python src/shmaas_key_stop_sampler_safe.py --route "$route"
             rc=$?
-            if [ "$rc" -ne 0 ]; then
-              echo "Sampler failed for ${route} with rc=${rc}"
-              failed=1
-            fi
+            if [ "$rc" -ne 0 ]; then echo "Sampler failed for ${route} with rc=${rc}"; failed=1; fi
           done
           echo "failed=${failed}" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Run Pudong35 reverse watch
+        if: steps.cadence.outputs.should_sample == 'true'
+        id: reverse_watch
+        shell: bash
+        run: |
+          set +e
+          date_cst="$(TZ=Asia/Shanghai date +%F)"
+          python src/reverse_watch_sampler.py --date "$date_cst"
+          rc=$?
+          echo "failed=$([ "$rc" -eq 0 ] && echo 0 || echo 1)" >> "$GITHUB_OUTPUT"
           exit 0
 
       - name: Preserve samples in one commit
@@ -112,7 +110,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           date_cst="$(TZ=Asia/Shanghai date +%F)"
-
           rm -rf /tmp/shmaas-new
           mkdir -p /tmp/shmaas-new
           found=0
@@ -121,141 +118,87 @@ jobs:
             latest="data/shmaas/latest-${route}.json"
             if [ -f "$file" ]; then
               tail -n 1 "$file" > "/tmp/shmaas-new/${route}.jsonl"
-              if [ ! -s "/tmp/shmaas-new/${route}.jsonl" ]; then
-                echo "Empty saved sample for ${route}; refusing to persist a silent data loss."
-                exit 1
-              fi
-              python - "$route" "/tmp/shmaas-new/${route}.jsonl" <<'PY'
-          import json, sys
-          route, path = sys.argv[1], sys.argv[2]
-          with open(path, encoding='utf-8') as f:
-              rec = json.loads(f.read())
-          if rec.get('route') != route or not rec.get('sample_time_cst'):
-              raise SystemExit(f'invalid saved sample for {route}')
-          PY
+              if [ ! -s "/tmp/shmaas-new/${route}.jsonl" ]; then echo "Empty saved sample for ${route}"; exit 1; fi
               found=1
             fi
-            if [ -f "$latest" ]; then
-              cp "$latest" "/tmp/shmaas-new/latest-${route}.json"
-            fi
+            if [ -f "$latest" ]; then cp "$latest" "/tmp/shmaas-new/latest-${route}.json"; fi
           done
-
-          if [ "$found" -eq 0 ]; then
-            echo 'No route produced a sample.'
-            exit 1
-          fi
+          watch="data/shmaas/${date_cst}-浦东35路-reverse-watch.jsonl"
+          if [ -f "$watch" ]; then tail -n 1 "$watch" > /tmp/shmaas-new/reverse-watch.jsonl; fi
+          if [ "$found" -eq 0 ]; then echo 'No route produced a sample.'; exit 1; fi
 
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
             mkdir -p data/shmaas
-
             for route in '浦东78路' '浦东35路' '182路'; do
-              saved="/tmp/shmaas-new/${route}.jsonl"
-              target="data/shmaas/${date_cst}-${route}.jsonl"
-              if [ -f "$saved" ]; then
-                touch "$target"
-                record="$(cat "$saved")"
-                grep -Fqx -- "$record" "$target" || printf '%s\n' "$record" >> "$target"
-                if ! grep -Fqx -- "$record" "$target"; then
-                  echo "Persistence verification failed for ${route}."
-                  exit 1
-                fi
-              fi
-              latest_saved="/tmp/shmaas-new/latest-${route}.json"
-              if [ -f "$latest_saved" ]; then
-                cp "$latest_saved" "data/shmaas/latest-${route}.json"
-              fi
+              saved="/tmp/shmaas-new/${route}.jsonl"; target="data/shmaas/${date_cst}-${route}.jsonl"
+              if [ -f "$saved" ]; then touch "$target"; record="$(cat "$saved")"; grep -Fqx -- "$record" "$target" || printf '%s\n' "$record" >> "$target"; fi
+              latest_saved="/tmp/shmaas-new/latest-${route}.json"; if [ -f "$latest_saved" ]; then cp "$latest_saved" "data/shmaas/latest-${route}.json"; fi
             done
+            if [ -f /tmp/shmaas-new/reverse-watch.jsonl ]; then
+              target="data/shmaas/${date_cst}-浦东35路-reverse-watch.jsonl"; touch "$target"; record="$(cat /tmp/shmaas-new/reverse-watch.jsonl)"; grep -Fqx -- "$record" "$target" || printf '%s\n' "$record" >> "$target"
+            fi
 
             python - "$date_cst" <<'PY'
           import csv, json, sys
           from datetime import datetime, timezone, timedelta
           from pathlib import Path
-
-          date = sys.argv[1]
-          root = Path('data/shmaas')
-          routes = ('浦东78路', '浦东35路', '182路')
+          date=sys.argv[1];root=Path('data/shmaas');routes=('浦东78路','浦东35路','182路')
           for route in routes:
-              source = root / f'{date}-{route}.jsonl'
-              if not source.exists():
-                  continue
-              seen = {}
+              source=root/f'{date}-{route}.jsonl'
+              if not source.exists(): continue
+              seen={}
               with source.open(encoding='utf-8') as f:
                   for line in f:
-                      try:
-                          rec = json.loads(line)
-                      except json.JSONDecodeError:
-                          continue
-                      sample_time = rec.get('sample_time_cst') or ''
+                      try: rec=json.loads(line)
+                      except json.JSONDecodeError: continue
+                      sample_time=rec.get('sample_time_cst') or ''
                       for vehicle in rec.get('vehicles') or []:
-                          plate = vehicle.get('plate')
-                          if not plate:
-                              continue
-                          item = seen.setdefault(plate, {'first_seen': sample_time, 'last_seen': sample_time, 'movement_seen': False, 'dispatch_seen': False})
-                          if sample_time and (not item['first_seen'] or sample_time < item['first_seen']): item['first_seen'] = sample_time
-                          if sample_time and sample_time > item['last_seen']: item['last_seen'] = sample_time
-                          roles = set(vehicle.get('roles') or [])
-                          item['movement_seen'] = item['movement_seen'] or bool(roles & {'current', 'next'})
-                          item['dispatch_seen'] = item['dispatch_seen'] or ('dispatch' in roles)
-              out = root / f'{date}-{route}-vehicles.csv'
-              with out.open('w', encoding='utf-8-sig', newline='') as f:
-                  w = csv.writer(f)
-                  w.writerow(['线路','车牌号','首次观测','最后观测','已上线运行','出现待发'])
+                          plate=vehicle.get('plate')
+                          if not plate: continue
+                          item=seen.setdefault(plate,{'first_seen':sample_time,'last_seen':sample_time,'movement_seen':False,'dispatch_seen':False})
+                          if sample_time and (not item['first_seen'] or sample_time<item['first_seen']): item['first_seen']=sample_time
+                          if sample_time and sample_time>item['last_seen']: item['last_seen']=sample_time
+                          roles=set(vehicle.get('roles') or []);item['movement_seen']|=bool(roles&{'current','next'});item['dispatch_seen']|=('dispatch' in roles)
+              out=root/f'{date}-{route}-vehicles.csv'
+              with out.open('w',encoding='utf-8-sig',newline='') as f:
+                  w=csv.writer(f);w.writerow(['线路','车牌号','首次观测','最后观测','已上线运行','出现待发'])
                   for plate in sorted(seen):
-                      x = seen[plate]
-                      w.writerow([route, plate, x['first_seen'], x['last_seen'], '是' if x['movement_seen'] else '否', '是' if x['dispatch_seen'] else '否'])
-              print(f'roster {route}: {len(seen)} vehicles -> {out}')
-
-          CST = timezone(timedelta(hours=8))
-          now = datetime.now(CST)
-          health = {
-              'generated_at_cst': now.isoformat(timespec='seconds'),
-              'stale_after_minutes': 15,
-              'routes': {},
-          }
+                      x=seen[plate];w.writerow([route,plate,x['first_seen'],x['last_seen'],'是' if x['movement_seen'] else '否','是' if x['dispatch_seen'] else '否'])
+          CST=timezone(timedelta(hours=8));now=datetime.now(CST)
+          health={'generated_at_cst':now.isoformat(timespec='seconds'),'stale_after_minutes':15,'routes':{}}
           for route in routes:
-              latest_path = root / f'latest-{route}.json'
-              item = {'latest_sample_time_cst': None, 'age_minutes': None, 'status': 'missing'}
+              latest_path=root/f'latest-{route}.json';item={'latest_sample_time_cst':None,'age_minutes':None,'status':'missing'}
               if latest_path.exists():
                   try:
-                      rec = json.loads(latest_path.read_text(encoding='utf-8'))
-                      text = rec.get('sample_time_cst')
+                      rec=json.loads(latest_path.read_text(encoding='utf-8'));text=rec.get('sample_time_cst')
                       if text:
-                          dt = datetime.fromisoformat(text).astimezone(CST)
-                          age = max(0.0, (now - dt).total_seconds() / 60)
-                          item = {
-                              'latest_sample_time_cst': dt.isoformat(timespec='seconds'),
-                              'age_minutes': round(age, 1),
-                              'status': 'healthy' if age <= 15 else 'stale',
-                          }
-                  except Exception as exc:
-                      item['error'] = str(exc)
-              health['routes'][route] = item
-          health['overall_status'] = 'healthy' if all(x['status'] == 'healthy' for x in health['routes'].values()) else 'stale'
-          health_path = root / 'collection-health.json'
-          health_path.write_text(json.dumps(health, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-          print(f'health -> {health_path}: {health["overall_status"]}')
+                          dt=datetime.fromisoformat(text).astimezone(CST);age=max(0.0,(now-dt).total_seconds()/60);item={'latest_sample_time_cst':dt.isoformat(timespec='seconds'),'age_minutes':round(age,1),'status':'healthy' if age<=15 else 'stale'}
+                  except Exception as exc:item['error']=str(exc)
+              health['routes'][route]=item
+          watch_path=root/f'{date}-浦东35路-reverse-watch.jsonl';watch_item={'latest_sample_time_cst':None,'age_minutes':None,'status':'missing','active_watches':None}
+          if watch_path.exists():
+              try:
+                  lines=[x for x in watch_path.read_text(encoding='utf-8').splitlines() if x.strip()]
+                  rec=json.loads(lines[-1]);dt=datetime.fromisoformat(rec['sample_time_cst']).astimezone(CST);age=max(0.0,(now-dt).total_seconds()/60)
+                  watch_item={'latest_sample_time_cst':dt.isoformat(timespec='seconds'),'age_minutes':round(age,1),'status':'healthy' if age<=15 else 'stale','active_watches':len(rec.get('watches') or [])}
+              except Exception as exc:watch_item['error']=str(exc)
+          health['reverse_watch']=watch_item
+          health['overall_status']='healthy' if all(x['status']=='healthy' for x in health['routes'].values()) and watch_item['status']=='healthy' else 'stale'
+          (root/'collection-health.json').write_text(json.dumps(health,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(f'health: {health["overall_status"]}; reverse_watch={watch_item["status"]}')
           PY
-
             git add data/shmaas
-            if git diff --cached --quiet; then
-              echo 'Samples already present.'
-              break
-            fi
+            if git diff --cached --quiet; then echo 'Samples already present.'; break; fi
             git commit -m 'data: persist combined SHMAAS sample'
-            if git push origin HEAD:main; then
-              break
-            fi
-            if [ "$attempt" -eq 5 ]; then
-              echo 'Failed to push samples after retries.'
-              exit 1
-            fi
+            if git push origin HEAD:main; then break; fi
+            if [ "$attempt" -eq 5 ]; then echo 'Failed to push samples after retries.'; exit 1; fi
             sleep $((attempt * 2))
           done
 
-      - name: Fail if any route sampler failed
-        if: steps.cadence.outputs.should_sample == 'true' && steps.sample.outputs.failed == '1'
+      - name: Fail if sampler or reverse watch failed
+        if: steps.cadence.outputs.should_sample == 'true' && (steps.sample.outputs.failed == '1' || steps.reverse_watch.outputs.failed == '1')
         run: |
-          echo 'At least one route returned sampling errors; successful samples were preserved.'
+          echo 'At least one route sampler or the reverse watcher returned errors; successful data were preserved.'
           exit 1
