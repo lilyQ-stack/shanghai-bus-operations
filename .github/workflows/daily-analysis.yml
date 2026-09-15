@@ -14,6 +14,7 @@ on:
       - 'src/analyze_daily.py'
       - 'src/analyze_daily_safe.py'
       - 'src/analyze_daily_rule4.py'
+      - 'src/legacy_quality_overlay.py'
       - 'src/reverse_watch_sampler.py'
       - 'requirements.txt'
 
@@ -51,7 +52,14 @@ jobs:
           echo "Analyzing Shanghai service date ${target_date} (event=${GITHUB_EVENT_NAME})"
 
       - name: Build daily exports
-        run: python src/analyze_daily_rule4.py --date "$TARGET_DATE"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python src/analyze_daily_rule4.py --date "$TARGET_DATE"
+          # Restore the strongest parts of the proven pudong78-operations pipeline:
+          # dispatch-revision dedupe, terminal-ETA arrival consensus, and same-vehicle
+          # historical-duration fallback. It never upgrades a confirmed short turn.
+          python src/legacy_quality_overlay.py --date "$TARGET_DATE"
 
       - name: Commit daily exports
         shell: bash
