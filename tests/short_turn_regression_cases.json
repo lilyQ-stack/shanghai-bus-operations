@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "timezone": "Asia/Shanghai",
+  "cases": [
+    {
+      "date": "2026-09-15",
+      "route": "浦东35路",
+      "plate": "沪A11062A",
+      "direction": 0,
+      "departure": "06:36",
+      "expected": "疑似区间车",
+      "authority": "user_ground_truth",
+      "note": "Confirmed short-turn positive sample. A replacement classifier must not downgrade this trip to full service."
+    },
+    {
+      "date": "2026-09-15",
+      "route": "浦东35路",
+      "plate": "沪A11062A",
+      "direction": 0,
+      "departure": "09:24",
+      "expected": "疑似区间车_or_strong_suspicion",
+      "authority": "user_observation_plus_temporal_feasibility",
+      "note": "At about 11:40 the same vehicle was about 3 minutes from the opposite terminal 东高路. Normal completion of the outbound trip plus terminal turnaround plus reverse run must be tested for physical feasibility; do not use a fixed 2.5-hour constant."
+    },
+    {
+      "date": "2026-09-11",
+      "route": "浦东78路",
+      "plate": "沪A55207D",
+      "direction": 0,
+      "departure": "19:58",
+      "expected": "全程车",
+      "authority": "user_ground_truth",
+      "note": "Last departure from 港城路 and confirmed to run the full route. Opposite-direction stop-centric ETA after terminal arrival must not be treated as short-turn evidence."
+    }
+  ]
+}
