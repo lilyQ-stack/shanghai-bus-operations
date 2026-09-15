@@ -16,10 +16,8 @@ on:
       - 'tests/**'
       - '.github/workflows/migration-regression.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   regression:
     runs-on: ubuntu-latest
@@ -45,28 +43,27 @@ jobs:
         run: |
           rm -rf /tmp/migration-export && mkdir -p /tmp/migration-export
           python src/export_daily_operations.py --date 2026-09-15 | tee pipeline-regression.log
-          python - <<'PY'
-          import csv
-          rows=list(csv.DictReader(open('data/export/2026-09-15-operations.csv',encoding='utf-8-sig')))
-          print('EXPORT rows=',len(rows),'pending=',sum(r['到达时间'] in ('','待确认') for r in rows))
-          PY
           python src/postprocess_operations.py --date 2026-09-15 | tee -a pipeline-regression.log
           python - <<'PY'
           import csv,json
-          p='data/export/2026-09-15-operations.csv';rows=list(csv.DictReader(open(p,encoding='utf-8-sig')))
-          meta=json.load(open('data/export/2026-09-15-operations-meta.json',encoding='utf-8'))
-          print('POSTPROCESS rows=',len(rows),'deduped=',meta.get('dispatch_revision_deduped_count'),'short_turn_timing=',meta.get('short_turn_time_enriched_count'))
+          p='data/export/2026-09-15-operations.csv';rows=list(csv.DictReader(open(p,encoding='utf-8-sig')));meta=json.load(open('data/export/2026-09-15-operations-meta.json',encoding='utf-8'))
+          print('POSTPROCESS rows=',len(rows),'pending=',sum(r['到达时间'] in ('','待确认') for r in rows),'deduped=',meta.get('dispatch_revision_deduped_count'),'short_turn_timing=',meta.get('short_turn_time_enriched_count'))
+          PY
+          python src/finalize_full_trip_arrivals.py --date 2026-09-15 | tee -a pipeline-regression.log
+          python - <<'PY'
+          import csv,json
+          p='data/export/2026-09-15-operations.csv';rows=list(csv.DictReader(open(p,encoding='utf-8-sig')));meta=json.load(open('data/export/2026-09-15-operations-meta.json',encoding='utf-8'))
+          print('TERMINAL_FALLBACK pending=',sum(r['到达时间'] in ('','待确认') for r in rows),'filled=',meta.get('last_terminal_eta_fallback_count'))
           targets={(r['发车时间'],r['班次类型']) for r in rows if r['线路']=='浦东35路' and r['车牌号']=='沪A11062A' and r['发车时间'] in {'06:36','09:24'}}
-          if ('06:36','疑似区间车') not in targets or ('09:24','疑似区间车') not in targets:raise SystemExit('11062 classification drift after postprocess')
+          if ('06:36','疑似区间车') not in targets or ('09:24','疑似区间车') not in targets:raise SystemExit('11062 classification drift after terminal fallback')
           PY
           python src/estimate_individual_arrivals.py --date 2026-09-15 | tee -a pipeline-regression.log
           python - <<'PY'
           import csv
-          p='data/export/2026-09-15-operations.csv';rows=list(csv.DictReader(open(p,encoding='utf-8-sig')))
-          routes=set(r['线路'] for r in rows);required={'浦东35路','浦东78路','182路'}
-          if not required.issubset(routes):raise SystemExit(f'missing routes {required-routes}')
+          p='data/export/2026-09-15-operations.csv';rows=list(csv.DictReader(open(p,encoding='utf-8-sig')));required={'浦东35路','浦东78路','182路'}
+          if not required.issubset(set(r['线路'] for r in rows)):raise SystemExit('missing route')
           targets={(r['发车时间'],r['班次类型']) for r in rows if r['线路']=='浦东35路' and r['车牌号']=='沪A11062A' and r['发车时间'] in {'06:36','09:24'}}
-          if ('06:36','疑似区间车') not in targets or ('09:24','疑似区间车') not in targets:raise SystemExit('11062 classification drift after arrival estimator')
+          if ('06:36','疑似区间车') not in targets or ('09:24','疑似区间车') not in targets:raise SystemExit('11062 classification drift after estimator')
           pending=sum(r['到达时间'] in ('','待确认') for r in rows);rankable=sum(r.get('参与车速排名')=='是' for r in rows);grades={g:sum(r.get('到达置信度')==g for r in rows) for g in 'ABCD'}
           print('FINAL rows=',len(rows),'pending=',pending,'rankable=',rankable,'grades=',grades)
           PY
