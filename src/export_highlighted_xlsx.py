@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 TZ = ZoneInfo("Asia/Shanghai")
 YELLOW = PatternFill(fill_type="solid", fgColor="FFF2CC")
 HEADER = PatternFill(fill_type="solid", fgColor="D9EAF7")
+
+# User-facing workbook: direction is redundant with the origin stop. Keep the
+# vehicle's first system observation because it is useful for coverage analysis.
 HIDDEN_EXPORT_FIELDS = {"方向"}
 
 
@@ -63,7 +67,10 @@ def write_xlsx(csv_path: Path):
 
 
 def main():
-    date = datetime.now(TZ).date().isoformat()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--date")
+    args = ap.parse_args()
+    date = args.date or datetime.now(TZ).date().isoformat()
     export = ROOT / "data" / "export"
     for path in sorted(export.glob(f"{date}-*.csv")):
         if path.name.endswith("-vehicles.csv") or path.name.endswith("-vehicle-timeline.csv"):
