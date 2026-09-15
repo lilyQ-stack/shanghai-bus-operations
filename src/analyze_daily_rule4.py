@@ -7,7 +7,7 @@ import analyze_daily_safe as v3
 
 core = v3.core
 ROOT = Path(__file__).resolve().parents[1]
-RULE_VERSION = "1miss-reverse+3-gain5-v2"
+RULE_VERSION = "dual-evidence-short-turn-v3"
 
 
 def load_reverse_confirmations(date: str) -> list[dict]:
@@ -46,6 +46,33 @@ def confirmed_external_turn(route, plate, direction, dep, events):
     return max(matches, key=lambda x: x.get("reverse_gain_stops") or 0)
 
 
+def reliable_terminal_eta(route, d, dep, next_dep, route_info, events, plate):
+    """Strong full-trip guard learned from the proven private pipeline.
+
+    Repeated terminal ETA observations, or one ETA very close to the terminal,
+    override generic opposite-direction trajectory noise. This protects normal
+    terminal turnarounds such as the known Pudong78 last-bus case.
+    """
+    info = route_info.get((route, d)) or {}
+    terminal_seq = info.get("stop_count")
+    terminal_name = info.get("end_stop") or ""
+    same = [e for e in events.get((route, plate, d), []) if dep <= e["time"] < next_dep]
+    hits = []
+    for e in same:
+        seq = e.get("stop_seq")
+        name = e.get("stop_name") or ""
+        eta = e.get("eta_min")
+        if eta is None:
+            continue
+        if (terminal_seq and seq == terminal_seq) or (terminal_name and name == terminal_name):
+            hits.append(e)
+    if len(hits) >= 2:
+        return True
+    if any((e.get("eta_min") or 999) <= 5 for e in hits):
+        return True
+    return False
+
+
 def trajectory_classification(route, plate, d, dep, next_dep, route_info, events, min_full):
     same = [e for e in events.get((route, plate, d), []) if dep <= e["time"] < next_dep]
 
@@ -55,28 +82,44 @@ def trajectory_classification(route, plate, d, dep, next_dep, route_info, events
             last = same[-1]
             return hint_type, f"实时服务提示：{hint_text}", last.get("stop_name", ""), ""
 
+    # Full-trip evidence has priority over generic reverse noise. This is the
+    # key protection against recreating the historical 55207 false positive.
+    terminal_guard = reliable_terminal_eta(route, d, dep, next_dep, route_info, events, plate)
+
     external = confirmed_external_turn(route, plate, d, dep, events)
-    if external:
+    if external and not terminal_guard:
         last_seq = external.get("last_source_seq")
         last_name = v3.stop_name_for_seq(route_info, route, d, last_seq)
-        gain = external.get("reverse_gain_stops")
-        missing = external.get("missing_main_samples")
+        gain = external.get("reverse_gain_stops") or 0
         target = external.get("target_stop") or "反向追踪站"
         reason = (
             f"同向出现后下一次主采样即未再发现该车，立即启动定向反向追踪；"
-            f"从最后位置反向+3站开始每5分钟采集，在{target}方向确认反向推进{gain:.0f}站，"
+            f"从最后位置反向+3站开始追踪，在{target}方向确认反向推进{gain:.0f}站，"
             f"达到≥5站区间车判据"
         )
         return "疑似区间车", reason, last_name, ""
 
     result = v3.trajectory_classification(route, plate, d, dep, next_dep, route_info, events, min_full)
 
+    # Dual-evidence policy: the dedicated watcher is the preferred proof, but
+    # a complete reconstructed physical trajectory from the main sampler is
+    # also valid evidence when the watcher missed the event. v3 only emits a
+    # short-turn here after same-direction progression, a mid-route stop, and
+    # continuous spatially connected reverse progression. Do not accept it if
+    # strong terminal ETA evidence says the vehicle actually ran full route.
     if result[0] == "疑似区间车" and not str(result[1]).startswith("实时服务提示："):
+        if terminal_guard:
+            return (
+                "全程车",
+                "已取得可靠同向终点ETA证据；反向信息按正常终点折返/采样噪声处理，不判区间车",
+                result[2],
+                result[3],
+            )
         return (
-            "运行异常待查",
-            "旧轨迹模型发现疑似折返信号，但新规则要求：同向下一次主采样未再发现该车后立即启动5分钟定向反向追踪，并确认反向推进≥5站；当前尚未取得该确认",
+            "疑似区间车",
+            "主采样物理轨迹已形成完整折返证据（同向连续推进→中途停止→空间衔接的反向连续推进）；虽未取得独立reverse-watch确认，仍按双证据规则判定疑似区间车",
             result[2],
-            "",
+            result[3],
         )
     return result
 
