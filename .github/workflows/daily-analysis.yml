@@ -11,11 +11,15 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/daily-analysis.yml'
-      - 'src/analyze_daily.py'
-      - 'src/analyze_daily_safe.py'
-      - 'src/analyze_daily_rule4.py'
-      - 'src/legacy_quality_overlay.py'
-      - 'src/reverse_watch_sampler.py'
+      - 'src/export_daily_operations.py'
+      - 'src/postprocess_operations.py'
+      - 'src/finalize_full_trip_arrivals.py'
+      - 'src/reconcile_actual_departures.py'
+      - 'src/estimate_individual_arrivals.py'
+      - 'src/rank_daily_vehicle_speed.py'
+      - 'src/export_highlighted_xlsx.py'
+      - 'src/private_short_turn_classifier.py'
+      - 'src/temporal_feasibility.py'
       - 'requirements.txt'
 
 permissions:
@@ -51,15 +55,18 @@ jobs:
           echo "TARGET_DATE=${target_date}" >> "$GITHUB_ENV"
           echo "Analyzing Shanghai service date ${target_date} (event=${GITHUB_EVENT_NAME})"
 
-      - name: Build daily exports
+      - name: Build daily exports with private pipeline
         shell: bash
         run: |
           set -euo pipefail
-          python src/analyze_daily_rule4.py --date "$TARGET_DATE"
-          # Restore the strongest parts of the proven pudong78-operations pipeline:
-          # dispatch-revision dedupe, terminal-ETA arrival consensus, and same-vehicle
-          # historical-duration fallback. It never upgrades a confirmed short turn.
-          python src/legacy_quality_overlay.py --date "$TARGET_DATE"
+          python src/export_daily_operations.py --date "$TARGET_DATE"
+          python src/postprocess_operations.py --date "$TARGET_DATE"
+          python src/finalize_full_trip_arrivals.py --date "$TARGET_DATE"
+          python src/reconcile_actual_departures.py --date "$TARGET_DATE"
+          python src/estimate_individual_arrivals.py --date "$TARGET_DATE"
+          python src/rank_daily_vehicle_speed.py --date "$TARGET_DATE"
+          # XLSX must be generated last so it always reflects the final CSV.
+          python src/export_highlighted_xlsx.py --date "$TARGET_DATE"
 
       - name: Commit daily exports
         shell: bash
