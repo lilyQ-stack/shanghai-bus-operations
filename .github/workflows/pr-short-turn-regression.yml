@@ -1,0 +1,64 @@
+name: PR Short Turn Regression
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/pr-short-turn-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit and classifier regressions
+        run: |
+          python -m unittest discover -s tests -v
+          python src/regression_short_turn.py
+      - name: Rebuild 2026-09-16 through production pipeline
+        run: |
+          python src/export_daily_operations.py --date 2026-09-16
+          python src/postprocess_operations.py --date 2026-09-16
+          python src/finalize_full_trip_arrivals.py --date 2026-09-16
+          python src/reconcile_actual_departures.py --date 2026-09-16
+          python src/estimate_individual_arrivals.py --date 2026-09-16
+          python src/rank_daily_vehicle_speed.py --date 2026-09-16
+      - name: Assert today's Pudong35 positives
+        run: |
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+          p=Path('data/export/2026-09-16-浦东35路.csv')
+          rows=list(csv.DictReader(p.open(encoding='utf-8-sig',newline='')))
+          expected={('沪A17590A','06:36'),('沪A62981D','07:24')}
+          found={(r['车牌号'],r['发车时间']) for r in rows if r['班次类型']=='疑似区间车'}
+          missing=expected-found
+          assert not missing, f'missing positive short turns: {sorted(missing)}; found={sorted(found)}'
+          for plate,dep in sorted(expected):
+              r=next(r for r in rows if r['车牌号']==plate and r['发车时间']==dep)
+              print(plate,dep,r['区间站'],r['区间站到达时间'],r['区间站折返发车时间'],r['区间时间说明'])
+          PY
+      - name: Assert historical Pudong78 false positives stay full trips
+        run: |
+          python src/export_daily_operations.py --date 2026-09-11
+          python src/postprocess_operations.py --date 2026-09-11
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+          p=Path('data/export/2026-09-11-浦东78路.csv')
+          rows=list(csv.DictReader(p.open(encoding='utf-8-sig',newline='')))
+          expected={('沪A35172D','18:25'),('沪A36809D','19:05'),('沪A55207D','19:58'),('沪A56123D','17:25'),('沪A57022D','19:30'),('沪A57902D','17:10'),('沪A59117D','17:55')}
+          got={(r['车牌号'],r['发车时间']):r['班次类型'] for r in rows}
+          bad=[(k,got.get(k)) for k in sorted(expected) if got.get(k)!='全程车']
+          assert not bad, f'historical false positives regressed: {bad}'
+          print('Historical Pudong78 hard negatives PASS')
+          PY
