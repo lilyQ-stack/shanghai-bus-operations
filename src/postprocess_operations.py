@@ -20,8 +20,15 @@ def num(v):
     try:return float(v)
     except (TypeError,ValueError):return None
 
+def physical_seq(obs):
+    try:
+        stop_seq=int(obs.get('stop_seq') or 0); remaining=int(obs.get('remaining_stops') or 0)
+    except (TypeError,ValueError):return None
+    if stop_seq<=0:return None
+    return max(1,stop_seq-remaining)
+
 def load_raw(date):
-    events=defaultdict(list); sightings=defaultdict(lambda:defaultdict(list))
+    events=defaultdict(list); sightings=defaultdict(lambda:defaultdict(list)); stop_maps=defaultdict(dict)
     for path in sorted((ROOT/'data/shmaas').glob(f'{date}-*.jsonl')):
         if path.name.endswith('-reverse-watch.jsonl'):continue
         for line in path.open(encoding='utf-8'):
@@ -31,18 +38,27 @@ def load_raw(date):
                 if not snap.get('success'):continue
                 route=str(snap.get('route') or ''); captured=datetime.fromisoformat(snap['sample_time_cst']).astimezone(TZ)
             except:continue
+            # Build the best available direction/sequence -> real stop-name map from route metadata.
+            for dmeta in snap.get('directions',[]) or []:
+                try:direction=int(dmeta.get('direction'))
+                except:continue
+                for stop in dmeta.get('stops',[]) or dmeta.get('sampled_stops',[]) or []:
+                    try:seq=int(stop.get('seq') or 0)
+                    except:continue
+                    name=str(stop.get('stop_name') or '').strip()
+                    if seq>0 and name:stop_maps[(route,direction)][seq]=name
             for vehicle in snap.get('vehicles',[]) or []:
                 plate=str(vehicle.get('plate') or '').strip()
                 if not plate:continue
                 for obs in vehicle.get('observations',[]) or []:
                     try:direction=int(obs.get('direction'))
                     except:continue
-                    role=str(obs.get('role') or ''); eta=num(obs.get('arrive_time'))
-                    events[(route,plate)].append({'time':captured,'direction':direction,'role':role,'stop_name':str(obs.get('stop_name') or ''),'stop_seq':obs.get('stop_seq'),'eta':eta})
+                    role=str(obs.get('role') or ''); eta=num(obs.get('arrive_time')); pseq=physical_seq(obs)
+                    events[(route,plate)].append({'time':captured,'direction':direction,'role':role,'stop_name':str(obs.get('stop_name') or ''),'stop_seq':obs.get('stop_seq'),'remaining_stops':obs.get('remaining_stops'),'physical_seq':pseq,'eta':eta})
                     dispatch=str(obs.get('dispatch_time') or '').strip()
                     if dispatch:sightings[(route,plate,direction)][dispatch].append(captured)
     for k in events:events[k].sort(key=lambda x:x['time'])
-    return events,sightings
+    return events,sightings,stop_maps
 
 def dedupe_rows(rows,date,sightings):
     grouped=defaultdict(list)
@@ -69,10 +85,18 @@ def dedupe_rows(rows,date,sightings):
     kept.sort(key=lambda r:(r.get('线路',''),r.get('发车时间',''),r.get('车牌号','')));return kept,removed
 
 def seq_num(e):
-    try:return int(e.get('stop_seq') or 0)
+    try:return int(e.get('physical_seq') or 0)
     except:return 0
 
-def enrich_short_turn_times(rows,date,events):
+def mapped_stop(route,direction,seq,stop_maps):
+    if not seq:return ''
+    exact=stop_maps.get((route,direction),{}).get(seq)
+    if exact:return exact
+    # Never relabel a reconstructed physical position with a downstream queried stop.
+    # If full route metadata is unavailable, keep the physical sequence explicit.
+    return f'物理seq{seq}（站名待映射）'
+
+def enrich_short_turn_times(rows,date,events,stop_maps):
     """Timing enrichment only. Never decides whether a trip is a short turn."""
     enriched=0; deps=defaultdict(list)
     for row in rows:
@@ -87,22 +111,26 @@ def enrich_short_turn_times(rows,date,events):
         route,plate,dtext=row.get('线路',''),row.get('车牌号',''),row.get('方向','')
         try:direction=int(dtext)
         except:continue
-        next_dep=next((x for x in deps[(route,plate,dtext)] if x>dep),None)
-        moving=[e for e in events.get((route,plate),[]) if e['time']>=dep and (next_dep is None or e['time']<next_dep) and e['role'] in {'current','next'} and e['eta'] is not None]
+        # Isolate this trip at the next captured dispatch of the same vehicle in either direction.
+        all_next=[]
+        for (r,p,d),times in deps.items():
+            if r==route and p==plate:all_next.extend(x for x in times if x>dep)
+        next_dep=min(all_next) if all_next else None
+        moving=[e for e in events.get((route,plate),[]) if e['time']>=dep and (next_dep is None or e['time']<next_dep) and e['role'] in {'current','next'} and e.get('physical_seq') is not None]
         same=[e for e in moving if e['direction']==direction]; opp=[e for e in moving if e['direction']!=direction]
         if not same or not opp:continue
         first_opp=min(opp,key=lambda e:e['time']); last_same=max((e for e in same if e['time']<first_opp['time']),key=lambda e:(e['time'],seq_num(e)),default=None)
         if not last_same:continue
-        row['区间站']=last_same.get('stop_name') or str(last_same.get('stop_seq') or '')
+        pseq=seq_num(last_same); row['区间站']=mapped_stop(route,direction,pseq,stop_maps)
         eta=last_same.get('eta'); arrival=None
         if eta is not None and 0<=eta<=MAX_SHORT_TURN_ERROR_MIN:
             arrival=last_same['time']+timedelta(minutes=eta);row['区间站到达时间']=fmt(arrival)
-        reta=first_opp.get('eta'); rstation=first_opp.get('stop_name') or str(first_opp.get('stop_seq') or ''); ranchor=first_opp['time']+timedelta(minutes=reta) if reta is not None and 0<=reta<=180 else None
+        reta=first_opp.get('eta'); rseq=seq_num(first_opp); rstation=mapped_stop(route,first_opp['direction'],rseq,stop_maps); ranchor=first_opp['time']+timedelta(minutes=reta) if reta is not None and 0<=reta<=180 else None
         if arrival:
             upper=min(first_opp['time'],ranchor) if ranchor else first_opp['time'];span=(upper-arrival).total_seconds()/60
             if 0<=span<=2*MAX_SHORT_TURN_ERROR_MIN:
-                turn=arrival+(upper-arrival)/2;row['区间站折返发车时间']=fmt(turn);row['区间时间说明']=f'到达按末次同向重点站ETA估算；折返发车结合首次反向运行观测取区间中点，约±{max(1,round(span/2))}分钟'+(f'；反向重点站{rstation} ETA {round(reta)}分钟参与校验' if reta is not None else '');enriched+=1;continue
-        row['区间时间说明']='区间折返已由主分类器确认；现有采样不足以把折返发车时间控制在±10分钟'
+                turn=arrival+(upper-arrival)/2;row['区间站折返发车时间']=fmt(turn);row['区间时间说明']=f'折返点按重建物理位置seq{pseq}映射；到达按末次同向ETA估算；折返发车结合首次反向物理观测取区间中点，约±{max(1,round(span/2))}分钟'+(f'；反向位置{rstation} ETA {round(reta)}分钟参与校验' if reta is not None else '');enriched+=1;continue
+        row['区间时间说明']=f'区间折返已由主分类器确认；折返点按重建物理位置seq{pseq}映射；现有采样不足以把折返发车时间控制在±10分钟'
     return enriched
 
 def read_csv(p):
@@ -112,7 +140,7 @@ def write_csv(p,rows,fields):
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--date');a=ap.parse_args();date=a.date or datetime.now(TZ).date().isoformat();export=ROOT/'data/export';combined=export/f'{date}-operations.csv'
     if not combined.exists():print('No combined operations export; skip postprocess');return 0
-    events,sightings=load_raw(date);rows=read_csv(combined);rows,removed=dedupe_rows(rows,date,sightings);enriched=enrich_short_turn_times(rows,date,events)
+    events,sightings,stop_maps=load_raw(date);rows=read_csv(combined);rows,removed=dedupe_rows(rows,date,sightings);enriched=enrich_short_turn_times(rows,date,events,stop_maps)
     base=list(rows[0].keys()) if rows else [];extra=['区间站','区间站到达时间','区间站折返发车时间','区间时间说明'];fields=[f for f in base if f not in extra]+extra;write_csv(combined,rows,fields)
     by=defaultdict(list)
     for r in rows:by[r.get('线路','')].append(r)
