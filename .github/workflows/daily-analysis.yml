@@ -10,8 +10,7 @@ on:
   push:
     branches: [main]
     paths:
-      # Primary fallback trigger: every persisted SHMAAS sample wakes this
-      # workflow. The gate below limits rolling exports to about hourly.
+      # Fallback trigger: persisted SHMAAS samples wake the workflow.
       - 'data/shmaas/**'
       - '.github/workflows/daily-analysis.yml'
       - 'src/export_daily_operations.py'
@@ -59,40 +58,35 @@ jobs:
           echo "TARGET_DATE=${target_date}" >> "$GITHUB_ENV"
           echo "Analyzing Shanghai service date ${target_date} (event=${GITHUB_EVENT_NAME})"
 
-          # Manual and scheduled runs always analyze. Pushes caused by raw
-          # SHMAAS persistence act as a fallback wake-up, but only rebuild the
-          # exports when the last published operations CSV is at least 45 min
-          # older than the newest raw SHMAAS file. This avoids an analysis run
-          # after every ~8-10 minute sampler commit while also recovering from
-          # missed GitHub schedule events.
+          # Manual/scheduled runs and workflow/code changes always analyze.
           if [ "$GITHUB_EVENT_NAME" != "push" ]; then
             echo "run_analysis=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          newest_raw_epoch=0
-          while IFS= read -r -d '' f; do
-            epoch=$(stat -c %Y "$f")
-            if [ "$epoch" -gt "$newest_raw_epoch" ]; then
-              newest_raw_epoch="$epoch"
-            fi
-          done < <(find data/shmaas -maxdepth 1 -type f -name "${target_date}-*.jsonl" -print0 2>/dev/null || true)
-
-          export_file="data/export/${target_date}-operations.csv"
-          if [ ! -f "$export_file" ]; then
-            echo "No operations CSV yet; running analysis."
+          changed="$(git show --pretty='' --name-only HEAD)"
+          if echo "$changed" | grep -qv '^data/shmaas/'; then
+            echo "Non-raw-data workflow/code push; running analysis."
             echo "run_analysis=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          export_epoch=$(stat -c %Y "$export_file")
-          age=$((newest_raw_epoch - export_epoch))
-          echo "Newest raw minus export age: ${age}s"
-          if [ "$newest_raw_epoch" -gt 0 ] && [ "$age" -ge 2700 ]; then
-            echo "run_analysis=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run_analysis=false" >> "$GITHUB_OUTPUT"
+          # Raw-data fallback: sampler commits arrive roughly every 8-10 min.
+          # Rebuild once per Shanghai clock hour, on the first raw-data commit
+          # at minute 15 or later. This avoids unreliable filesystem mtimes.
+          sh_minute="$(TZ=Asia/Shanghai date +%M)"
+          if [ "$((10#$sh_minute))" -ge 15 ]; then
+            marker="data/export/${target_date}-analysis-hour.txt"
+            sh_hour="$(TZ=Asia/Shanghai date +%H)"
+            previous=""
+            if [ -f "$marker" ]; then previous="$(cat "$marker")"; fi
+            if [ "$previous" != "$sh_hour" ]; then
+              echo "run_analysis=true" >> "$GITHUB_OUTPUT"
+              echo "ANALYSIS_HOUR=${sh_hour}" >> "$GITHUB_ENV"
+              exit 0
+            fi
           fi
+          echo "run_analysis=false" >> "$GITHUB_OUTPUT"
 
       - name: Build daily exports with private pipeline
         if: steps.gate.outputs.run_analysis == 'true'
@@ -105,8 +99,10 @@ jobs:
           python src/reconcile_actual_departures.py --date "$TARGET_DATE"
           python src/estimate_individual_arrivals.py --date "$TARGET_DATE"
           python src/rank_daily_vehicle_speed.py --date "$TARGET_DATE"
-          # XLSX must be generated last so it always reflects the final CSV.
           python src/export_highlighted_xlsx.py --date "$TARGET_DATE"
+          if [ -n "${ANALYSIS_HOUR:-}" ]; then
+            printf '%s\n' "$ANALYSIS_HOUR" > "data/export/${TARGET_DATE}-analysis-hour.txt"
+          fi
 
       - name: Commit daily exports
         if: steps.gate.outputs.run_analysis == 'true'
