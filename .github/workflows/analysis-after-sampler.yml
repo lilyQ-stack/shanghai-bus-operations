@@ -1,0 +1,110 @@
+name: Analysis After Sampler
+
+on:
+  workflow_run:
+    workflows: ['SHMAAS Combined Sampler']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: analysis-after-sampler
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    # Manual runs always execute. Automatic runs require a successful sampler.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Resolve Shanghai date and hourly gate
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          target_date="$(TZ=Asia/Shanghai date +%F)"
+          sh_hour="$(TZ=Asia/Shanghai date +%H)"
+          sh_minute="$(TZ=Asia/Shanghai date +%M)"
+          echo "TARGET_DATE=${target_date}" >> "$GITHUB_ENV"
+          echo "ANALYSIS_HOUR=${sh_hour}" >> "$GITHUB_ENV"
+
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "run_analysis=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # First successful sampler completion at/after :15 each Shanghai hour
+          # rebuilds exports. A committed marker prevents duplicate hourly work.
+          if [ "$((10#$sh_minute))" -lt 15 ]; then
+            echo "run_analysis=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          marker="data/export/${target_date}-analysis-hour.txt"
+          previous=""
+          if [ -f "$marker" ]; then previous="$(cat "$marker")"; fi
+          if [ "$previous" = "$sh_hour" ]; then
+            echo "run_analysis=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_analysis=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build production daily exports
+        if: steps.gate.outputs.run_analysis == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python src/export_daily_operations.py --date "$TARGET_DATE"
+          python src/postprocess_operations.py --date "$TARGET_DATE"
+          python src/finalize_full_trip_arrivals.py --date "$TARGET_DATE"
+          python src/reconcile_actual_departures.py --date "$TARGET_DATE"
+          python src/estimate_individual_arrivals.py --date "$TARGET_DATE"
+          python src/rank_daily_vehicle_speed.py --date "$TARGET_DATE"
+          python src/export_highlighted_xlsx.py --date "$TARGET_DATE"
+          printf '%s\n' "$ANALYSIS_HOUR" > "data/export/${TARGET_DATE}-analysis-hour.txt"
+
+      - name: Commit daily exports
+        if: steps.gate.outputs.run_analysis == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm -rf /tmp/daily-export
+          mkdir -p /tmp/daily-export
+          cp -a data/export/. /tmp/daily-export/
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p data/export
+            cp -a /tmp/daily-export/. data/export/
+            git add data/export
+            if git diff --cached --quiet; then
+              echo 'Daily export already current.'
+              exit 0
+            fi
+            git commit -m "data: publish ${TARGET_DATE} sampler-linked operations analysis"
+            if git push origin HEAD:main; then exit 0; fi
+            if [ "$attempt" -eq 5 ]; then
+              echo 'Failed to push daily export after retries.'
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
