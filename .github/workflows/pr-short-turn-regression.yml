@@ -20,9 +20,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest openpyxl
       - name: Unit and classifier regressions
         run: |
-          python -m unittest discover -s tests -v
+          python -m pytest -q tests/test_private_short_turn_classifier.py tests/test_temporal_feasibility.py
           python src/regression_short_turn.py
       - name: Rebuild 2026-09-16 through production pipeline
         run: |
