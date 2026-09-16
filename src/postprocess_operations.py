@@ -7,8 +7,6 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT=Path(__file__).resolve().parents[1]; TZ=ZoneInfo('Asia/Shanghai')
-# This 20-minute window is ONLY the proven timetable-revision dedupe rule.
-# It is not, and must never again become, a short-turn classification threshold.
 REVISION_WINDOW_MIN=20
 MAX_SHORT_TURN_ERROR_MIN=10
 
@@ -19,6 +17,14 @@ def fmt(x):return x.astimezone(TZ).strftime('%H:%M') if x else ''
 def num(v):
     try:return float(v)
     except (TypeError,ValueError):return None
+
+def physical_seq(obs):
+    """Reconstruct the vehicle's physical route position from a stop-centric ETA observation."""
+    try:
+        stop_seq=int(obs.get('stop_seq') or 0); remaining=int(obs.get('remaining_stops') or 0)
+    except (TypeError,ValueError):return None
+    if stop_seq<=0:return None
+    return max(1,stop_seq-remaining)
 
 def load_raw(date):
     events=defaultdict(list); sightings=defaultdict(lambda:defaultdict(list))
@@ -38,7 +44,9 @@ def load_raw(date):
                     try:direction=int(obs.get('direction'))
                     except:continue
                     role=str(obs.get('role') or ''); eta=num(obs.get('arrive_time'))
-                    events[(route,plate)].append({'time':captured,'direction':direction,'role':role,'stop_name':str(obs.get('stop_name') or ''),'stop_seq':obs.get('stop_seq'),'eta':eta})
+                    event={'time':captured,'direction':direction,'role':role,'stop_name':str(obs.get('stop_name') or ''),'stop_seq':obs.get('stop_seq'),'remaining_stops':obs.get('remaining_stops'),'eta':eta}
+                    event['physical_seq']=physical_seq(obs)
+                    events[(route,plate)].append(event)
                     dispatch=str(obs.get('dispatch_time') or '').strip()
                     if dispatch:sightings[(route,plate,direction)][dispatch].append(captured)
     for k in events:events[k].sort(key=lambda x:x['time'])
@@ -69,11 +77,10 @@ def dedupe_rows(rows,date,sightings):
     kept.sort(key=lambda r:(r.get('线路',''),r.get('发车时间',''),r.get('车牌号','')));return kept,removed
 
 def seq_num(e):
-    try:return int(e.get('stop_seq') or 0)
-    except:return 0
+    return e.get('physical_seq') or 0
 
 def enrich_short_turn_times(rows,date,events):
-    """Timing enrichment only. Never decides whether a trip is a short turn."""
+    """Timing enrichment only. Uses the same reconstructed physical trajectory as the classifier."""
     enriched=0; deps=defaultdict(list)
     for row in rows:
         d=parse_dt(date,row.get('发车时间',''))
@@ -87,22 +94,41 @@ def enrich_short_turn_times(rows,date,events):
         route,plate,dtext=row.get('线路',''),row.get('车牌号',''),row.get('方向','')
         try:direction=int(dtext)
         except:continue
-        next_dep=next((x for x in deps[(route,plate,dtext)] if x>dep),None)
-        moving=[e for e in events.get((route,plate),[]) if e['time']>=dep and (next_dep is None or e['time']<next_dep) and e['role'] in {'current','next'} and e['eta'] is not None]
+        # Isolate at the next captured dispatch of this vehicle in either direction,
+        # matching the production exporter's trip-isolation rule.
+        all_next=[]
+        for (r,p,d),times in deps.items():
+            if r==route and p==plate:
+                all_next.extend(x for x in times if x>dep)
+        next_dep=min(all_next) if all_next else None
+        moving=[e for e in events.get((route,plate),[]) if e['time']>=dep and (next_dep is None or e['time']<next_dep) and e['role'] in {'current','next'} and e.get('physical_seq') is not None]
         same=[e for e in moving if e['direction']==direction]; opp=[e for e in moving if e['direction']!=direction]
         if not same or not opp:continue
-        first_opp=min(opp,key=lambda e:e['time']); last_same=max((e for e in same if e['time']<first_opp['time']),key=lambda e:(e['time'],seq_num(e)),default=None)
+        # The first credible reverse physical point is the anchor used by the classifier.
+        first_opp=min(opp,key=lambda e:e['time'])
+        last_same=max((e for e in same if e['time']<first_opp['time']),key=lambda e:(e['time'],seq_num(e)),default=None)
         if not last_same:continue
-        row['区间站']=last_same.get('stop_name') or str(last_same.get('stop_seq') or '')
+        row['区间站']=last_same.get('stop_name') or f"物理seq{seq_num(last_same)}"
+        # ETA is still useful for clock precision, but position comes from reconstructed trajectory.
         eta=last_same.get('eta'); arrival=None
         if eta is not None and 0<=eta<=MAX_SHORT_TURN_ERROR_MIN:
             arrival=last_same['time']+timedelta(minutes=eta);row['区间站到达时间']=fmt(arrival)
-        reta=first_opp.get('eta'); rstation=first_opp.get('stop_name') or str(first_opp.get('stop_seq') or ''); ranchor=first_opp['time']+timedelta(minutes=reta) if reta is not None and 0<=reta<=180 else None
+        # If no usable ETA exists, the disappearance/reappearance interval itself is a bounded estimate.
+        upper=first_opp['time']
+        if arrival is None:
+            span=(upper-last_same['time']).total_seconds()/60
+            if 0<=span<=2*MAX_SHORT_TURN_ERROR_MIN:
+                arrival=last_same['time']+(upper-last_same['time'])/2
+                row['区间站到达时间']=fmt(arrival)
+                row['区间站折返发车时间']=fmt(arrival)
+                row['区间时间说明']=f'按重建物理轨迹：末次同向观测至首次反向观测区间取中点，约±{max(1,round(span/2))}分钟；物理位置seq{seq_num(last_same)}→反向seq{seq_num(first_opp)}'
+                enriched+=1;continue
+        reta=first_opp.get('eta'); rstation=first_opp.get('stop_name') or f"物理seq{seq_num(first_opp)}"; ranchor=first_opp['time']+timedelta(minutes=reta) if reta is not None and 0<=reta<=180 else None
         if arrival:
             upper=min(first_opp['time'],ranchor) if ranchor else first_opp['time'];span=(upper-arrival).total_seconds()/60
             if 0<=span<=2*MAX_SHORT_TURN_ERROR_MIN:
-                turn=arrival+(upper-arrival)/2;row['区间站折返发车时间']=fmt(turn);row['区间时间说明']=f'到达按末次同向重点站ETA估算；折返发车结合首次反向运行观测取区间中点，约±{max(1,round(span/2))}分钟'+(f'；反向重点站{rstation} ETA {round(reta)}分钟参与校验' if reta is not None else '');enriched+=1;continue
-        row['区间时间说明']='区间折返已由主分类器确认；现有采样不足以把折返发车时间控制在±10分钟'
+                turn=arrival+(upper-arrival)/2;row['区间站折返发车时间']=fmt(turn);row['区间时间说明']=f'折返点位置按重建物理轨迹确定；到达按末次同向重点站ETA估算；折返发车结合首次反向物理观测取区间中点，约±{max(1,round(span/2))}分钟'+(f'；反向重点站{rstation} ETA {round(reta)}分钟参与校验' if reta is not None else '');enriched+=1;continue
+        row['区间时间说明']='区间折返已由主分类器确认；重建物理轨迹存在，但当前同向消失至反向重现时间窗仍超过±10分钟标准'
     return enriched
 
 def read_csv(p):
