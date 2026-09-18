@@ -11,8 +11,8 @@ import shmaas_key_stop_sampler as api
 ROUTE = "浦东35路"
 CST = api.CST
 MISS_COUNT = 1
-START_OFFSET = 3
-CONFIRM_GAIN = 5
+WATCH_OFFSETS = (1, 3, 5, 8, 12)
+CONFIRM_GAIN = 2
 TERMINAL_GUARD = 0.85
 
 
@@ -200,6 +200,25 @@ def query_target(stop: dict, direction: int, plate: str):
     return None, None
 
 
+def query_reverse_corridor(stops: list[dict], direction: int, plate: str, mirror_seq: int):
+    """Probe several downstream reverse stops instead of one fragile mirror target."""
+    hits = []
+    queried = []
+    for offset in WATCH_OFFSETS:
+        target_seq = min(len(stops), mirror_seq + offset)
+        if target_seq in queried:
+            continue
+        queried.append(target_seq)
+        stop = stops[target_seq - 1]
+        role, reverse_seq = query_target(stop, direction, plate)
+        if reverse_seq is not None:
+            hits.append((reverse_seq, role, target_seq, stop["stopName"]))
+    if not hits:
+        return None, None, queried, None
+    reverse_seq, role, target_seq, stop_name = max(hits, key=lambda x: x[0])
+    return role, reverse_seq, queried, {"target_seq": target_seq, "target_stop": stop_name}
+
+
 def run(date: str, root: Path):
     source = root / "data" / "shmaas" / f"{date}-{ROUTE}.jsonl"
     track_path = root / "data" / "shmaas" / f"{date}-{ROUTE}-reverse-watch.jsonl"
@@ -213,7 +232,7 @@ def run(date: str, root: Path):
         "sample_time_cst": now.isoformat(timespec="seconds"),
         "date_cst": date,
         "route": ROUTE,
-        "rule_version": "1miss-reverse+3-gain5-v2",
+        "rule_version": "1miss-multistop-reverse-gain2-v3",
         "watches": [],
     }
 
@@ -231,20 +250,29 @@ def run(date: str, root: Path):
             continue
         p = (watch["last_source_seq"] - 1) / (source_count - 1)
         mirror_seq = round((1 - p) * (len(reverse_stops) - 1)) + 1
-        start_seq = min(len(reverse_stops), mirror_seq + START_OFFSET)
+        role, reverse_seq, queried_seqs, hit = query_reverse_corridor(
+            reverse_stops, rd, watch["plate"], mirror_seq
+        )
         max_prior = prev.get("max_reverse_seq")
-        target_seq = start_seq if max_prior is None else min(len(reverse_stops), max(start_seq, int(max_prior) + START_OFFSET))
-        stop = reverse_stops[target_seq - 1]
-        role, reverse_seq = query_target(stop, rd, watch["plate"])
-        gain = (reverse_seq - mirror_seq) if reverse_seq is not None else None
-        confirmed = gain is not None and gain >= CONFIRM_GAIN
+        baseline = max_prior if max_prior is not None else reverse_seq
+        gain = None
+        if reverse_seq is not None and baseline is not None:
+            gain = reverse_seq - baseline
+        # First credible reverse point establishes the baseline. Confirmation
+        # requires a later observation at least two physical stops farther on.
+        confirmed = (
+            max_prior is not None
+            and reverse_seq is not None
+            and reverse_seq - max_prior >= CONFIRM_GAIN
+        )
         result["watches"].append({
             **watch,
             "watch_key": key,
             "reverse_direction": rd,
             "mirror_seq": mirror_seq,
-            "target_seq": target_seq,
-            "target_stop": stop["stopName"],
+            "queried_reverse_seqs": queried_seqs,
+            "target_seq": hit["target_seq"] if hit else None,
+            "target_stop": hit["target_stop"] if hit else None,
             "matched_role": role,
             "reverse_seq_est": reverse_seq,
             "reverse_gain_stops": round(gain, 2) if gain is not None else None,
