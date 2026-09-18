@@ -40,6 +40,8 @@ def build(date,snaps):
     events[(route,plate)].append({'time':now,'direction':direction,'role':str(o.get('role') or ''),'stop_seq':o.get('stop_seq'),'stop_name':str(o.get('stop_name') or ''),'arrive_minutes':num(o.get('arrive_time')),'distance_m':num(o.get('distance')),'remaining_stops':num(o.get('remaining_stops'))})
     dep=str(o.get('dispatch_time') or '').strip()
     if dep:
+     # A dispatch row is a timetable/waiting observation, not proof that the
+     # vehicle actually departed. Keep it as a candidate and validate below.
      k=(route,plate,direction,dep);old=dispatch.get(k,{})
      dispatch[k]={'route':route,'plate':plate,'direction':direction,'departure':dep,'first_seen':min(now,old.get('first_seen',now)),'last_seen':max(now,old.get('last_seen',now))}
  def depdt(x):
@@ -72,6 +74,24 @@ def build(date,snaps):
   if len(preds)>=2 and(preds[-1]-preds[0]).total_seconds()/60<=10:
    spread=(preds[-1]-preds[0]).total_seconds()/60;med=datetime.fromtimestamp(statistics.median([p.timestamp() for p in preds]),tz=TZ);u=max(3,min(5,round(spread/2)+1));return med,f'SHMAAS多次终点ETA一致估算，约±{u}分钟',u,'terminal_eta_consensus'
   return None
+ # Reject future/ghost dispatch candidates when there is no movement evidence
+ # for that plate at or after the planned departure. This specifically prevents
+ # stale terminal timetable rows from becoming operations after a vehicle has
+ # disappeared from all movement observations.
+ validated_dispatch={}
+ for k,d in dispatch.items():
+  dep=depdt(d['departure'])
+  if not dep:continue
+  movement=[e for e in events[(d['route'],d['plate'])] if e['role'] in {'current','next'} and e['time']>=dep]
+  if movement:
+   validated_dispatch[k]=d
+ dispatch=validated_dispatch
+ # Rebuild trip boundaries from validated departures only.
+ vehicle_departures=defaultdict(list)
+ for d in dispatch.values():
+  dd=depdt(d['departure'])
+  if dd:vehicle_departures[(d['route'],d['plate'])].append(dd)
+ for k in vehicle_departures:vehicle_departures[k]=sorted(set(vehicle_departures[k]))
  rows=[]
  for d in sorted(dispatch.values(),key=lambda x:(x['route'],x['departure'],x['plate'])):
   route,plate,direction=d['route'],d['plate'],d['direction'];info=dirs.get((route,direction),{});dep=depdt(d['departure']);all_ev=events[(route,plate)];endtime=trip_end(route,plate,dep) if dep else None;ev=[e for e in all_ev if dep<=e['time']<endtime] if dep else []
