@@ -5,12 +5,12 @@
     "2026-09-19-浦东35路.jsonl",
     "2026-09-19-浦东78路.jsonl"
   ],
-  "shmaas_snapshot_count": 102,
-  "shmaas_dispatch_event_count": 130,
-  "trip_row_count": 130,
+  "shmaas_snapshot_count": 120,
+  "shmaas_dispatch_event_count": 144,
+  "trip_row_count": 144,
   "service_type_status": "Trip-isolated evidence. Before 80% source progress + reverse physical gain >=2 stops => 疑似区间车; no hard elapsed-time limit; reliable same-direction terminal ETA guards full trips.",
   "first_shmaas_snapshot": "2026-09-19T01:46:17+08:00",
-  "last_shmaas_snapshot": "2026-09-19T11:21:39+08:00",
+  "last_shmaas_snapshot": "2026-09-19T12:21:42+08:00",
   "dispatch_revision_deduped_count": 0,
   "short_turn_time_enriched_count": 2,
   "departure_status": "Private-pipeline dispatch revision dedupe only: same route/plate/direction schedule revisions within 20 minutes are clustered and the schedule observed latest by SHMAAS is retained. This 20-minute window is unrelated to short-turn classification.",
@@ -21,13 +21,16 @@
   "terminal_arrival_plus_two_count": 5,
   "departure_priority_rule": "If a vehicle reaches the previous trip terminal after its next planned departure time, the planned time is invalid and actual departure is set to confirmed terminal arrival plus 2 minutes. Known short-turn departures continue to use their independently inferred actual turnaround departure. Full-trip duration is recalculated after any departure override.",
   "arrival_confidence_counts": {
-    "A": 79,
-    "D": 41,
-    "B": 8,
+    "A": 100,
+    "D": 32,
+    "B": 10,
     "C": 2
   },
-  "speed_rank_eligible_count": 89,
-  "individual_arrival_estimate_counts": {},
+  "speed_rank_eligible_count": 112,
+  "individual_arrival_estimate_counts": {
+    "own_duration": 2,
+    "own_segment": 1
+  },
   "individual_arrival_rule": "Arrival estimates never borrow another vehicle's behavior. Historical model inputs are themselves restricted to rank-eligible A/B/C arrivals. Priority after terminal ETA: same vehicle next reverse departure minus its own historical layover; same vehicle key-stop ETA plus its own historical remaining time; same vehicle historical full-trip duration in the same time bucket. Only A/B/C (estimated error <=15 min) may participate in speed ranking; D is display-only or pending.",
   "daily_vehicle_speed_ranking_rule": "Within each route, rank each vehicle by its arithmetic mean full-trip duration across that day's A/B/C rank-eligible full-route trips. Lower mean duration ranks faster. Each vehicle is calculated only from its own trips. Short turns and D-grade arrivals are excluded. Display format is rank/total vehicles observed on that route that day. Physical km/h remains blank until reliable route distance is available.",
   "daily_vehicle_ranked_counts": {
