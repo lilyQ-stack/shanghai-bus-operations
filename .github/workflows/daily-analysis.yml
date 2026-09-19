@@ -104,6 +104,15 @@ jobs:
             printf '%s\n' "$ANALYSIS_HOUR" > "data/export/${TARGET_DATE}-analysis-hour.txt"
           fi
 
+      - name: Upload daily Excel artifact
+        if: steps.gate.outputs.run_analysis == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bus-operations-${{ env.TARGET_DATE }}
+          path: data/export/${{ env.TARGET_DATE }}-*.xlsx
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Commit daily exports
         if: steps.gate.outputs.run_analysis == 'true'
         shell: bash
