@@ -1,0 +1,47 @@
+name: Test Excel Artifact
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-excel-artifact.yml'
+      - '.github/workflows/daily-analysis.yml'
+      - 'src/export_highlighted_xlsx.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  artifact-smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Rebuild historical Excel only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f data/export/2026-09-18-浦东35路.csv
+          test -f data/export/2026-09-18-浦东78路.csv
+          test -f data/export/2026-09-18-182路.csv
+          python src/export_highlighted_xlsx.py --date 2026-09-18
+          ls -lh data/export/2026-09-18-*.xlsx
+
+      - name: Upload historical Excel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bus-operations-2026-09-18-smoke-test
+          path: data/export/2026-09-18-*.xlsx
+          if-no-files-found: error
+          retention-days: 7
