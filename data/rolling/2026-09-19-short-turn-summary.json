@@ -1,6 +1,6 @@
 {
   "date_cst": "2026-09-19",
-  "generated_at_cst": "2026-09-19T13:48:30+08:00",
+  "generated_at_cst": "2026-09-19T17:45:46+08:00",
   "provisional": true,
   "analysis_rule_version": "dual-evidence-short-turn-v3",
   "semantics": "Pudong35 short-turn labels start reverse tracking after the first missed main sample; probes run every 5 minutes from mirrored reverse position +3 stops and confirm after at least 5 stops of reverse progress. Explicit official short-turn service hints remain authoritative.",
@@ -11,13 +11,13 @@
   ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": "2026-09-19T13:40:27+08:00",
+      "cutoff_cst": "2026-09-19T17:40:27+08:00",
       "candidate_count": 0,
       "candidates": []
     },
     "浦东35路": {
-      "cutoff_cst": "2026-09-19T13:41:01+08:00",
-      "candidate_count": 2,
+      "cutoff_cst": "2026-09-19T17:40:53+08:00",
+      "candidate_count": 3,
       "candidates": [
         {
           "plate": "沪A67057D",
@@ -30,6 +30,14 @@
         {
           "plate": "沪A79307D",
           "departure": "09:38",
+          "origin": "康恩路康浦路",
+          "destination": "东高路张杨北路",
+          "reason": "主采样物理轨迹已形成完整折返证据（同向连续推进→中途停止→空间衔接的反向连续推进）；虽未取得独立reverse-watch确认，仍按双证据规则判定疑似区间车",
+          "last_reliable_stop": "沪南路高科西路"
+        },
+        {
+          "plate": "沪A79307D",
+          "departure": "15:22",
           "origin": "康恩路康浦路",
           "destination": "东高路张杨北路",
           "reason": "主采样物理轨迹已形成完整折返证据（同向连续推进→中途停止→空间衔接的反向连续推进）；虽未取得独立reverse-watch确认，仍按双证据规则判定疑似区间车",
