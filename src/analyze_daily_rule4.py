@@ -73,7 +73,7 @@ def reliable_terminal_eta(route, d, dep, next_dep, route_info, events, plate):
     return False
 
 
-def near_terminal_zone(route, d, last_stop_name, route_info, protected_stops=6):
+def near_terminal_zone(route, d, last_stop_name, route_info, protected_fraction=0.15):
     """Treat a main-sampler break near the scheduled terminal as normal turnaround.
 
     This guard applies only to generic reconstructed-trajectory evidence. Explicit
@@ -81,12 +81,17 @@ def near_terminal_zone(route, d, last_stop_name, route_info, protected_stops=6):
     """
     info = route_info.get((route, d)) or {}
     stop_count = info.get("stop_count")
+    names = info.get("stop_names") or {}
     if not stop_count or not last_stop_name:
         return False
-    for seq in range(max(1, stop_count - protected_stops + 1), stop_count + 1):
-        if v3.stop_name_for_seq(route_info, route, d, seq) == last_stop_name:
-            return True
-    return False
+    # Match by the actual route stop-name map. The previous implementation called
+    # stop_name_for_seq(), but that helper expects stop_names; this direct lookup
+    # also makes the intended threshold explicit and testable.
+    matched = [seq for seq, name in names.items() if name == last_stop_name]
+    if not matched:
+        return False
+    threshold = max(1, int((stop_count - 1) * (1 - protected_fraction)) + 1)
+    return max(matched) >= threshold
 
 
 def trajectory_classification(route, plate, d, dep, next_dep, route_info, events, min_full):
@@ -129,7 +134,7 @@ def trajectory_classification(route, plate, d, dep, next_dep, route_info, events
         if terminal_guard or terminal_zone:
             return (
                 "全程车",
-                ("已取得可靠同向终点ETA证据；" if terminal_guard else "最后可靠轨迹已进入终点保护区（末6站）；") + "反向信息按正常终点折返/采样噪声处理，不判区间车",
+                ("已取得可靠同向终点ETA证据；" if terminal_guard else "最后可靠轨迹已进入终点保护区（线路末15%）；") + "反向信息按正常终点折返/采样噪声处理，不判区间车",
                 result[2],
                 result[3],
             )
