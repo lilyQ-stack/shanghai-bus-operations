@@ -118,8 +118,7 @@ def main():
     summary_path = out_dir / f"{date}-short-turn-summary.json"
     with summary_path.open("w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
-        f.write("
-")
+        f.write("\n")
     print(f"summary -> {summary_path.relative_to(ROOT)}")
 
 
