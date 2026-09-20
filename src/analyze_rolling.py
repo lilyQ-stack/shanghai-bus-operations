@@ -11,6 +11,7 @@ from pathlib import Path
 # start probing at mirrored reverse position +3 stops every 5 minutes and confirm
 # after >=5 stops of reverse progress.
 import analyze_daily_rule4 as rule4
+import analyze_daily_operations as operations
 
 core = rule4.core
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,7 +66,7 @@ def main():
     date = args.date or now_cst.strftime("%Y-%m-%d")
     snapshots, source_files = core.load_snapshots(date)
     route_info, events, dispatches, first_seen = core.collect_evidence(snapshots)
-    rows = core.build_rows(date, route_info, events, dispatches, first_seen)
+    # Use the operations-level classifier for rolling counts so every distinct\n    # plate + departure + direction is retained. Rule4 remains the guard/version\n    # layer, but candidate enumeration must be trip-level rather than plate-level.\n    rows = operations.build_rows(date, route_info, events, dispatches, first_seen)
     cutoffs = latest_cutoff_by_route(snapshots)
 
     out_dir = ROOT / "data" / "rolling"
@@ -74,6 +75,8 @@ def main():
         "date_cst": date,
         "generated_at_cst": now_cst.isoformat(timespec="seconds"),
         "provisional": True,
+        "counting_unit": "trip",
+        "trip_key": ["plate", "departure", "direction"],
         "analysis_rule_version": rule4.RULE_VERSION,
         "semantics": "Pudong35 short-turn labels start reverse tracking after the first missed main sample; probes run every 5 minutes from mirrored reverse position +3 stops and confirm after at least 5 stops of reverse progress. Explicit official short-turn service hints remain authoritative.",
         "sources": source_files,
@@ -92,9 +95,12 @@ def main():
         summary["routes"][route] = {
             "cutoff_cst": cutoff.isoformat(timespec="seconds") if cutoff else None,
             "candidate_count": len(candidates),
+            "trip_count": len(candidates),
+            "vehicle_count": len({row.get("车牌号", "") for row in candidates if row.get("车牌号")}),
             "candidates": [
                 {
                     "plate": row.get("车牌号", ""),
+                    "direction": row.get("方向", ""),
                     "departure": row.get("发车时间", ""),
                     "origin": row.get("发车站", ""),
                     "destination": row.get("终点站", ""),
