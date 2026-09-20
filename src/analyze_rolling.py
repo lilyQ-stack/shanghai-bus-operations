@@ -11,7 +11,7 @@ from pathlib import Path
 # start probing at mirrored reverse position +3 stops every 5 minutes and confirm
 # after >=5 stops of reverse progress.
 import analyze_daily_rule4 as rule4
-import analyze_daily_operations as operations
+import analyze_daily as operations
 
 core = rule4.core
 ROOT = Path(__file__).resolve().parents[1]
@@ -100,7 +100,7 @@ def main():
             "candidates": [
                 {
                     "plate": row.get("车牌号", ""),
-                    "direction": row.get("方向", ""),
+                    "direction": row.get("_direction", row.get("方向", "")),
                     "departure": row.get("发车时间", ""),
                     "origin": row.get("发车站", ""),
                     "destination": row.get("终点站", ""),
