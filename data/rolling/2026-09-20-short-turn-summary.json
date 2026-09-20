@@ -1,7 +1,13 @@
 {
   "date_cst": "2026-09-20",
-  "generated_at_cst": "2026-09-20T21:11:22+08:00",
+  "generated_at_cst": "2026-09-20T21:17:52+08:00",
   "provisional": true,
+  "counting_unit": "trip",
+  "trip_key": [
+    "plate",
+    "departure",
+    "direction"
+  ],
   "analysis_rule_version": "dual-evidence-short-turn-v4-terminal-zone",
   "semantics": "Pudong35 short-turn labels start reverse tracking after the first missed main sample; probes run every 5 minutes from mirrored reverse position +3 stops and confirm after at least 5 stops of reverse progress. Explicit official short-turn service hints remain authoritative.",
   "sources": [
@@ -11,16 +17,21 @@
   ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": "2026-09-20T21:00:40+08:00",
+      "cutoff_cst": "2026-09-20T21:10:27+08:00",
       "candidate_count": 0,
+      "trip_count": 0,
+      "vehicle_count": 0,
       "candidates": []
     },
     "浦东35路": {
-      "cutoff_cst": "2026-09-20T21:01:09+08:00",
+      "cutoff_cst": "2026-09-20T21:10:59+08:00",
       "candidate_count": 3,
+      "trip_count": 3,
+      "vehicle_count": 3,
       "candidates": [
         {
           "plate": "沪A11062A",
+          "direction": "",
           "departure": "06:36",
           "origin": "东高路张杨北路",
           "destination": "康恩路康浦路",
@@ -29,6 +40,7 @@
         },
         {
           "plate": "沪A67057D",
+          "direction": "",
           "departure": "07:24",
           "origin": "康恩路康浦路",
           "destination": "东高路张杨北路",
@@ -37,6 +49,7 @@
         },
         {
           "plate": "沪A79307D",
+          "direction": "",
           "departure": "12:30",
           "origin": "康恩路康浦路",
           "destination": "东高路张杨北路",
