@@ -7,7 +7,7 @@ import analyze_daily_safe as v3
 
 core = v3.core
 ROOT = Path(__file__).resolve().parents[1]
-RULE_VERSION = "dual-evidence-short-turn-v3"
+RULE_VERSION = "dual-evidence-short-turn-v4-terminal-zone"
 
 
 def load_reverse_confirmations(date: str) -> list[dict]:
@@ -73,6 +73,22 @@ def reliable_terminal_eta(route, d, dep, next_dep, route_info, events, plate):
     return False
 
 
+def near_terminal_zone(route, d, last_stop_name, route_info, protected_stops=6):
+    """Treat a main-sampler break near the scheduled terminal as normal turnaround.
+
+    This guard applies only to generic reconstructed-trajectory evidence. Explicit
+    service hints and independently confirmed reverse-watch evidence remain valid.
+    """
+    info = route_info.get((route, d)) or {}
+    stop_count = info.get("stop_count")
+    if not stop_count or not last_stop_name:
+        return False
+    for seq in range(max(1, stop_count - protected_stops + 1), stop_count + 1):
+        if v3.stop_name_for_seq(route_info, route, d, seq) == last_stop_name:
+            return True
+    return False
+
+
 def trajectory_classification(route, plate, d, dep, next_dep, route_info, events, min_full):
     same = [e for e in events.get((route, plate, d), []) if dep <= e["time"] < next_dep]
 
@@ -108,10 +124,12 @@ def trajectory_classification(route, plate, d, dep, next_dep, route_info, events
     # continuous spatially connected reverse progression. Do not accept it if
     # strong terminal ETA evidence says the vehicle actually ran full route.
     if result[0] == "疑似区间车" and not str(result[1]).startswith("实时服务提示："):
-        if terminal_guard:
+        last_stop = result[2]
+        terminal_zone = near_terminal_zone(route, d, last_stop, route_info)
+        if terminal_guard or terminal_zone:
             return (
                 "全程车",
-                "已取得可靠同向终点ETA证据；反向信息按正常终点折返/采样噪声处理，不判区间车",
+                ("已取得可靠同向终点ETA证据；" if terminal_guard else "最后可靠轨迹已进入终点保护区（末6站）；") + "反向信息按正常终点折返/采样噪声处理，不判区间车",
                 result[2],
                 result[3],
             )
