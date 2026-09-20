@@ -5,37 +5,38 @@
     "2026-09-20-浦东35路.jsonl",
     "2026-09-20-浦东78路.jsonl"
   ],
-  "shmaas_snapshot_count": 45,
-  "shmaas_dispatch_event_count": 71,
-  "trip_row_count": 71,
+  "shmaas_snapshot_count": 51,
+  "shmaas_dispatch_event_count": 81,
+  "trip_row_count": 79,
   "service_type_status": "Trip-isolated evidence. Before 80% source progress + reverse physical gain >=2 stops => 疑似区间车; no hard elapsed-time limit; reliable same-direction terminal ETA guards full trips.",
   "first_shmaas_snapshot": "2026-09-20T00:29:23+08:00",
-  "last_shmaas_snapshot": "2026-09-20T08:01:57+08:00",
-  "dispatch_revision_deduped_count": 0,
-  "short_turn_time_enriched_count": 0,
+  "last_shmaas_snapshot": "2026-09-20T08:19:32+08:00",
+  "dispatch_revision_deduped_count": 2,
+  "short_turn_time_enriched_count": 1,
   "departure_status": "Private-pipeline dispatch revision dedupe only: same route/plate/direction schedule revisions within 20 minutes are clustered and the schedule observed latest by SHMAAS is retained. This 20-minute window is unrelated to short-turn classification.",
-  "last_terminal_eta_fallback_count": 6,
+  "last_terminal_eta_fallback_count": 5,
   "arrival_fallback_rule": "Only full trips still lacking arrival use the last valid same-direction terminal ETA in the trip window; short-turn/anomaly rows are excluded and existing arrivals are never overwritten.",
   "actual_departure_override_count": 0,
   "invalid_planned_departure_count": 0,
   "terminal_arrival_plus_two_count": 0,
   "departure_priority_rule": "If a vehicle reaches the previous trip terminal after its next planned departure time, the planned time is invalid and actual departure is set to confirmed terminal arrival plus 2 minutes. Known short-turn departures continue to use their independently inferred actual turnaround departure. Full-trip duration is recalculated after any departure override.",
   "arrival_confidence_counts": {
-    "A": 10,
-    "B": 41,
-    "D": 16,
+    "A": 16,
+    "B": 47,
+    "D": 12,
     "C": 4
   },
-  "speed_rank_eligible_count": 55,
+  "speed_rank_eligible_count": 67,
   "individual_arrival_estimate_counts": {
-    "own_segment": 30,
-    "own_duration": 11
+    "reverse_departure": 1,
+    "own_segment": 32,
+    "own_duration": 13
   },
   "individual_arrival_rule": "Arrival estimates never borrow another vehicle's behavior. Historical model inputs are themselves restricted to rank-eligible A/B/C arrivals. Priority after terminal ETA: same vehicle next reverse departure minus its own historical layover; same vehicle key-stop ETA plus its own historical remaining time; same vehicle historical full-trip duration in the same time bucket. Only A/B/C (estimated error <=15 min) may participate in speed ranking; D is display-only or pending.",
   "daily_vehicle_speed_ranking_rule": "Within each route, rank each vehicle by its arithmetic mean full-trip duration across that day's A/B/C rank-eligible full-route trips. Lower mean duration ranks faster. Each vehicle is calculated only from its own trips. Short turns and D-grade arrivals are excluded. Display format is rank/total vehicles observed on that route that day. Physical km/h remains blank until reliable route distance is available.",
   "daily_vehicle_ranked_counts": {
-    "182路": 10,
-    "浦东35路": 19,
+    "182路": 12,
+    "浦东35路": 22,
     "浦东78路": 15
   }
 }
