@@ -66,7 +66,10 @@ def main():
     date = args.date or now_cst.strftime("%Y-%m-%d")
     snapshots, source_files = core.load_snapshots(date)
     route_info, events, dispatches, first_seen = core.collect_evidence(snapshots)
-    # Use the operations-level classifier for rolling counts so every distinct\n    # plate + departure + direction is retained. Rule4 remains the guard/version\n    # layer, but candidate enumeration must be trip-level rather than plate-level.\n    rows = operations.build_rows(date, route_info, events, dispatches, first_seen)
+    # Use the operations-level classifier for rolling counts so every distinct
+    # plate + departure + direction is retained. Rule4 remains the guard/version
+    # layer, but candidate enumeration must be trip-level rather than plate-level.
+    rows = operations.build_rows(date, route_info, events, dispatches, first_seen)
     cutoffs = latest_cutoff_by_route(snapshots)
 
     out_dir = ROOT / "data" / "rolling"
@@ -115,7 +118,8 @@ def main():
     summary_path = out_dir / f"{date}-short-turn-summary.json"
     with summary_path.open("w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
-        f.write("\n")
+        f.write("
+")
     print(f"summary -> {summary_path.relative_to(ROOT)}")
 
 
