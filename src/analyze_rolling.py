@@ -66,7 +66,20 @@ def main():
     date = args.date or now_cst.strftime("%Y-%m-%d")
     snapshots, source_files = core.load_snapshots(date)
     route_info, events, dispatches, first_seen = core.collect_evidence(snapshots)
-    # Use the same trip-isolated classifier as the full operations export.\n    # This guarantees rolling counts retain every plate + departure + direction.\n    op_rows, _, _, _ = tripops.build(date, snapshots)\n    rows = [\n        {\n            "线路": r.get("线路", ""), "车牌号": r.get("车牌号", ""),\n            "方向": r.get("方向", ""), "发车时间": r.get("发车时间", ""),\n            "发车站": r.get("始发站", ""), "终点站": r.get("终点站", ""),\n            "班次类型": r.get("班次类型", ""),\n            "区间/异常说明": r.get("班次类型判定依据", ""),\n            "最后可靠采集站点": "", "本车首次观测": r.get("本车首次观测", ""),\n        }\n        for r in op_rows\n    ]
+    # Use the same trip-isolated classifier as the full operations export.
+    # This guarantees rolling counts retain every plate + departure + direction.
+    op_rows, _, _, _ = tripops.build(date, snapshots)
+    rows = [
+        {
+            "线路": r.get("线路", ""), "车牌号": r.get("车牌号", ""),
+            "方向": r.get("方向", ""), "发车时间": r.get("发车时间", ""),
+            "发车站": r.get("始发站", ""), "终点站": r.get("终点站", ""),
+            "班次类型": r.get("班次类型", ""),
+            "区间/异常说明": r.get("班次类型判定依据", ""),
+            "最后可靠采集站点": "", "本车首次观测": r.get("本车首次观测", ""),
+        }
+        for r in op_rows
+    ]
     cutoffs = latest_cutoff_by_route(snapshots)
 
     out_dir = ROOT / "data" / "rolling"
