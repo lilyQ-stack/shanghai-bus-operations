@@ -1,6 +1,6 @@
 {
   "date_cst": "2026-09-20",
-  "generated_at_cst": "2026-09-20T21:18:13+08:00",
+  "generated_at_cst": "2026-09-20T21:25:37+08:00",
   "provisional": true,
   "counting_unit": "trip",
   "trip_key": [
@@ -9,7 +9,7 @@
     "direction"
   ],
   "analysis_rule_version": "dual-evidence-short-turn-v4-terminal-zone",
-  "semantics": "Pudong35 short-turn labels start reverse tracking after the first missed main sample; probes run every 5 minutes from mirrored reverse position +3 stops and confirm after at least 5 stops of reverse progress. Explicit official short-turn service hints remain authoritative.",
+  "semantics": "Trip-level rolling classification uses the same trip-isolated short-turn classifier as the full operations export: plate + departure + direction is one trip; reliable terminal ETA protects full trips; reverse physical progress confirms short turns.",
   "sources": [
     "data/shmaas/2026-09-20-浦东78路.jsonl",
     "data/shmaas/2026-09-20-浦东35路.jsonl",
@@ -17,44 +17,99 @@
   ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": "2026-09-20T21:10:27+08:00",
-      "candidate_count": 0,
-      "trip_count": 0,
-      "vehicle_count": 0,
-      "candidates": []
+      "cutoff_cst": "2026-09-20T21:20:28+08:00",
+      "candidate_count": 2,
+      "trip_count": 2,
+      "vehicle_count": 2,
+      "candidates": [
+        {
+          "plate": "沪A58633D",
+          "direction": 1,
+          "departure": "10:20",
+          "origin": "锦带路迎春路（浦东新区办公中心）",
+          "destination": "港城路地铁站",
+          "reason": "原方向在全程32%处后消失；随后反向物理轨迹由seq21推进至seq29，推进8站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A55150D",
+          "direction": 1,
+          "departure": "10:45",
+          "origin": "锦带路迎春路（浦东新区办公中心）",
+          "destination": "港城路地铁站",
+          "reason": "原方向在全程42%处后消失；随后反向物理轨迹由seq22推进至seq36，推进14站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        }
+      ]
     },
     "浦东35路": {
-      "cutoff_cst": "2026-09-20T21:10:59+08:00",
-      "candidate_count": 3,
-      "trip_count": 3,
-      "vehicle_count": 3,
+      "cutoff_cst": "2026-09-20T21:20:54+08:00",
+      "candidate_count": 7,
+      "trip_count": 7,
+      "vehicle_count": 5,
       "candidates": [
         {
           "plate": "沪A11062A",
-          "direction": "",
+          "direction": 0,
           "departure": "06:36",
           "origin": "东高路张杨北路",
           "destination": "康恩路康浦路",
-          "reason": "主采样物理轨迹已形成完整折返证据（同向连续推进→中途停止→空间衔接的反向连续推进）；虽未取得独立reverse-watch确认，仍按双证据规则判定疑似区间车",
-          "last_reliable_stop": "迎春路长柳路"
+          "reason": "原方向在全程49%处后消失；随后反向物理轨迹由seq29推进至seq61，推进32站，达到≥2站确认条件",
+          "last_reliable_stop": ""
         },
         {
           "plate": "沪A67057D",
-          "direction": "",
+          "direction": 1,
           "departure": "07:24",
           "origin": "康恩路康浦路",
           "destination": "东高路张杨北路",
-          "reason": "主采样物理轨迹已形成完整折返证据（同向连续推进→中途停止→空间衔接的反向连续推进）；虽未取得独立reverse-watch确认，仍按双证据规则判定疑似区间车",
-          "last_reliable_stop": "沪南路华夏西路"
+          "reason": "原方向在全程34%处后消失；随后反向物理轨迹由seq38推进至seq55，推进17站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A11062A",
+          "direction": 0,
+          "departure": "09:24",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程40%处后消失；随后反向物理轨迹由seq29推进至seq64，推进35站，达到≥2站确认条件",
+          "last_reliable_stop": ""
         },
         {
           "plate": "沪A79307D",
-          "direction": "",
+          "direction": 1,
           "departure": "12:30",
           "origin": "康恩路康浦路",
           "destination": "东高路张杨北路",
-          "reason": "主采样物理轨迹已形成完整折返证据（同向连续推进→中途停止→空间衔接的反向连续推进）；虽未取得独立reverse-watch确认，仍按双证据规则判定疑似区间车",
-          "last_reliable_stop": "沪南路高科西路"
+          "reason": "原方向在全程36%处后消失；随后反向物理轨迹由seq38推进至seq56，推进18站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A11062A",
+          "direction": 0,
+          "departure": "15:35",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程40%处后消失；随后反向物理轨迹由seq28推进至seq62，推进34站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A62981D",
+          "direction": 0,
+          "departure": "19:10",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程43%处后消失；随后反向物理轨迹由seq29推进至seq64，推进35站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A62217D",
+          "direction": 0,
+          "departure": "19:30",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程44%处后消失；随后反向物理轨迹由seq28推进至seq55，推进27站，达到≥2站确认条件",
+          "last_reliable_stop": ""
         }
       ]
     }
