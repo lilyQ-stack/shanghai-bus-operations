@@ -5,12 +5,12 @@
     "2026-09-21-浦东35路.jsonl",
     "2026-09-21-浦东78路.jsonl"
   ],
-  "shmaas_snapshot_count": 132,
-  "shmaas_dispatch_event_count": 184,
-  "trip_row_count": 167,
+  "shmaas_snapshot_count": 141,
+  "shmaas_dispatch_event_count": 191,
+  "trip_row_count": 174,
   "service_type_status": "Trip-isolated evidence. Before 80% source progress + reverse physical gain >=2 stops => 疑似区间车; no hard elapsed-time limit; reliable same-direction terminal ETA guards full trips.",
   "first_shmaas_snapshot": "2026-09-21T00:57:40+08:00",
-  "last_shmaas_snapshot": "2026-09-21T12:51:42+08:00",
+  "last_shmaas_snapshot": "2026-09-21T13:19:28+08:00",
   "dispatch_revision_deduped_count": 17,
   "short_turn_time_enriched_count": 1,
   "departure_status": "Private-pipeline dispatch revision dedupe only: same route/plate/direction schedule revisions within 20 minutes are clustered and the schedule observed latest by SHMAAS is retained. This 20-minute window is unrelated to short-turn classification.",
@@ -21,15 +21,15 @@
   "terminal_arrival_plus_two_count": 1,
   "departure_priority_rule": "If a vehicle reaches the previous trip terminal after its next planned departure time, the planned time is invalid and actual departure is set to confirmed terminal arrival plus 2 minutes. Known short-turn departures continue to use their independently inferred actual turnaround departure. Full-trip duration is recalculated after any departure override.",
   "arrival_confidence_counts": {
-    "A": 103,
-    "B": 37,
-    "C": 17,
-    "D": 10
+    "A": 109,
+    "B": 38,
+    "C": 16,
+    "D": 11
   },
-  "speed_rank_eligible_count": 157,
+  "speed_rank_eligible_count": 163,
   "individual_arrival_estimate_counts": {
-    "own_segment": 16,
-    "own_duration": 16,
+    "own_segment": 14,
+    "own_duration": 18,
     "reverse_departure": 3
   },
   "individual_arrival_rule": "Arrival estimates never borrow another vehicle's behavior. Historical model inputs are themselves restricted to rank-eligible A/B/C arrivals. Priority after terminal ETA: same vehicle next reverse departure minus its own historical layover; same vehicle key-stop ETA plus its own historical remaining time; same vehicle historical full-trip duration in the same time bucket. Only A/B/C (estimated error <=15 min) may participate in speed ranking; D is display-only or pending.",
@@ -37,6 +37,6 @@
   "daily_vehicle_ranked_counts": {
     "182路": 14,
     "浦东35路": 26,
-    "浦东78路": 17
+    "浦东78路": 18
   }
 }
