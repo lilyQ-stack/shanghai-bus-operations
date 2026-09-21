@@ -1,6 +1,6 @@
 {
   "date_cst": "2026-09-21",
-  "generated_at_cst": "2026-09-21T06:56:30+08:00",
+  "generated_at_cst": "2026-09-21T08:52:08+08:00",
   "provisional": true,
   "counting_unit": "trip",
   "trip_key": [
@@ -17,18 +17,38 @@
   ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": "2026-09-21T06:51:05+08:00",
-      "candidate_count": 0,
-      "trip_count": 0,
-      "vehicle_count": 0,
-      "candidates": []
+      "cutoff_cst": "2026-09-21T08:50:29+08:00",
+      "candidate_count": 1,
+      "trip_count": 1,
+      "vehicle_count": 1,
+      "candidates": [
+        {
+          "plate": "沪A35172D",
+          "direction": 0,
+          "departure": "06:10",
+          "origin": "港城路地铁站",
+          "destination": "锦带路迎春路（浦东新区办公中心）",
+          "reason": "原方向在全程54%处后消失；随后反向物理轨迹由seq26推进至seq37，推进11站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        }
+      ]
     },
     "浦东35路": {
-      "cutoff_cst": "2026-09-21T06:51:38+08:00",
-      "candidate_count": 0,
-      "trip_count": 0,
-      "vehicle_count": 0,
-      "candidates": []
+      "cutoff_cst": "2026-09-21T08:50:52+08:00",
+      "candidate_count": 1,
+      "trip_count": 1,
+      "vehicle_count": 1,
+      "candidates": [
+        {
+          "plate": "沪A11062A",
+          "direction": 0,
+          "departure": "06:36",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程44%处后消失；随后反向物理轨迹由seq28推进至seq52，推进24站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        }
+      ]
     }
   }
 }
