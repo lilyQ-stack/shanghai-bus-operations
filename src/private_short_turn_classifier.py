@@ -116,4 +116,4 @@ def classify_short_turn(
         if impossible:
             return Classification("疑似区间车", f"正常跑完全程后再折返在时间上不可实现：{note}", "temporal_impossibility")
 
-    return Classification("全程车", "未形成反向≥2站物理推进证据或可靠时空矛盾", "no_short_turn_evidence")
+    return Classification("待确认", "既无可靠终点到达证据，也未形成反向≥2站物理推进证据或可靠时空矛盾", "insufficient_evidence")
