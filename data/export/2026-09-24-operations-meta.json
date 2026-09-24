@@ -5,12 +5,12 @@
     "2026-09-24-浦东35路.jsonl",
     "2026-09-24-浦东78路.jsonl"
   ],
-  "shmaas_snapshot_count": 150,
-  "shmaas_dispatch_event_count": 189,
-  "trip_row_count": 184,
+  "shmaas_snapshot_count": 153,
+  "shmaas_dispatch_event_count": 190,
+  "trip_row_count": 185,
   "service_type_status": "Trip-isolated evidence. Before 80% source progress + reverse physical gain >=2 stops => 疑似区间车; no hard elapsed-time limit; reliable same-direction terminal ETA guards full trips.",
   "first_shmaas_snapshot": "2026-09-24T00:13:10+08:00",
-  "last_shmaas_snapshot": "2026-09-24T14:02:03+08:00",
+  "last_shmaas_snapshot": "2026-09-24T14:12:08+08:00",
   "dispatch_revision_deduped_count": 5,
   "short_turn_time_enriched_count": 3,
   "departure_status": "Private-pipeline dispatch revision dedupe only: same route/plate/direction schedule revisions within 20 minutes are clustered and the schedule observed latest by SHMAAS is retained. This 20-minute window is unrelated to short-turn classification.",
@@ -22,7 +22,7 @@
   "departure_priority_rule": "If a vehicle reaches the previous trip terminal after its next planned departure time, the planned time is invalid and actual departure is set to confirmed terminal arrival plus 2 minutes. Known short-turn departures continue to use their independently inferred actual turnaround departure. Full-trip duration is recalculated after any departure override.",
   "arrival_confidence_counts": {
     "A": 124,
-    "D": 60
+    "D": 61
   },
   "speed_rank_eligible_count": 124,
   "individual_arrival_estimate_counts": {},
