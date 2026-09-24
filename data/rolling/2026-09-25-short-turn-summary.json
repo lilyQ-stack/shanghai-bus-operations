@@ -1,6 +1,6 @@
 {
   "date_cst": "2026-09-25",
-  "generated_at_cst": "2026-09-25T01:20:09+08:00",
+  "generated_at_cst": "2026-09-25T07:44:52+08:00",
   "provisional": true,
   "counting_unit": "trip",
   "trip_key": [
@@ -10,17 +10,21 @@
   ],
   "analysis_rule_version": "dual-evidence-short-turn-v4-terminal-zone",
   "semantics": "Trip-level rolling classification uses the same trip-isolated short-turn classifier as the full operations export: plate + departure + direction is one trip; reliable terminal ETA protects full trips; reverse physical progress confirms short turns.",
-  "sources": [],
+  "sources": [
+    "data/shmaas/2026-09-25-浦东78路.jsonl",
+    "data/shmaas/2026-09-25-浦东35路.jsonl",
+    "data/shmaas/2026-09-25-182路.jsonl"
+  ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": null,
+      "cutoff_cst": "2026-09-25T07:40:30+08:00",
       "candidate_count": 0,
       "trip_count": 0,
       "vehicle_count": 0,
       "candidates": []
     },
     "浦东35路": {
-      "cutoff_cst": null,
+      "cutoff_cst": "2026-09-25T07:41:05+08:00",
       "candidate_count": 0,
       "trip_count": 0,
       "vehicle_count": 0,
