@@ -1,6 +1,6 @@
 {
   "date_cst": "2026-09-24",
-  "generated_at_cst": "2026-09-24T14:42:58+08:00",
+  "generated_at_cst": "2026-09-24T20:18:35+08:00",
   "provisional": true,
   "counting_unit": "trip",
   "trip_key": [
@@ -17,17 +17,36 @@
   ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": "2026-09-24T14:40:32+08:00",
-      "candidate_count": 0,
-      "trip_count": 0,
-      "vehicle_count": 0,
-      "candidates": []
+      "cutoff_cst": "2026-09-24T20:10:32+08:00",
+      "candidate_count": 2,
+      "trip_count": 2,
+      "vehicle_count": 2,
+      "candidates": [
+        {
+          "plate": "沪A35172D",
+          "direction": 1,
+          "departure": "10:20",
+          "origin": "锦带路迎春路（浦东新区办公中心）",
+          "destination": "港城路地铁站",
+          "reason": "原方向在全程38%处后消失；随后反向物理轨迹由seq22推进至seq34，推进12站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A66391D",
+          "direction": 1,
+          "departure": "10:45",
+          "origin": "锦带路迎春路（浦东新区办公中心）",
+          "destination": "港城路地铁站",
+          "reason": "原方向在全程38%处后消失；随后反向物理轨迹由seq24推进至seq37，推进13站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        }
+      ]
     },
     "浦东35路": {
-      "cutoff_cst": "2026-09-24T14:41:03+08:00",
-      "candidate_count": 3,
-      "trip_count": 3,
-      "vehicle_count": 2,
+      "cutoff_cst": "2026-09-24T20:11:10+08:00",
+      "candidate_count": 4,
+      "trip_count": 4,
+      "vehicle_count": 3,
       "candidates": [
         {
           "plate": "沪A11062A",
@@ -54,6 +73,15 @@
           "origin": "康恩路康浦路",
           "destination": "东高路张杨北路",
           "reason": "原方向在全程36%处后消失；随后反向物理轨迹由seq38推进至seq62，推进24站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A51682D",
+          "direction": 0,
+          "departure": "15:35",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程46%处后消失；随后反向物理轨迹由seq29推进至seq63，推进34站，达到≥2站确认条件",
           "last_reliable_stop": ""
         }
       ]
