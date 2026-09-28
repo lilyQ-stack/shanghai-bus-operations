@@ -11,6 +11,10 @@ ROOT=Path(__file__).resolve().parents[1]; TZ=ZoneInfo('Asia/Shanghai')
 # It is not, and must never again become, a short-turn classification threshold.
 REVISION_WINDOW_MIN=20
 MAX_SHORT_TURN_ERROR_MIN=10
+# Conservative second-stage conflict window. Unlike REVISION_WINDOW_MIN, this only
+# removes a weaker pending candidate when a nearby same-origin/same-direction trip
+# has reliable full-trip evidence. It is NOT a generic time-based dedupe rule.
+EVIDENCE_CONFLICT_WINDOW_MIN=45
 
 def parse_dt(date,hm):
     try:return datetime.fromisoformat(f'{date}T{hm}:00+08:00').astimezone(TZ)
@@ -82,7 +86,31 @@ def dedupe_rows(rows,date,sightings):
                 times=schedule.get(row.get('发车时间',''),[]); last=max(times) if times else datetime.min.replace(tzinfo=TZ)
                 return last,len(times),row.get('发车时间','')
             kept.append(max(cluster,key=rank));removed+=len(cluster)-1
-    kept.sort(key=lambda r:(r.get('线路',''),r.get('发车时间',''),r.get('车牌号','')));return kept,removed
+    # Second-stage evidence-conflict dedupe: catch timetable candidates that are
+    # farther apart than the 20-minute revision window (e.g. 08:21 vs 08:47),
+    # without widening that generic window and risking deletion of real short trips.
+    # Only a weak 待确认 row may be removed, and only when a nearby later row for
+    # the same vehicle/direction/origin has reliable full-trip terminal evidence.
+    final=[]
+    bykey=defaultdict(list)
+    for r in kept:bykey[(r.get('线路',''),r.get('车牌号',''),r.get('方向',''),r.get('始发站',''))].append(r)
+    for group in bykey.values():
+        ordered=sorted(group,key=lambda r:r.get('发车时间',''))
+        drop=set()
+        for i,weak in enumerate(ordered):
+            if weak.get('班次类型')!='待确认':continue
+            wd=parse_dt(date,weak.get('发车时间',''))
+            if not wd:continue
+            for strong in ordered[i+1:]:
+                sd=parse_dt(date,strong.get('发车时间',''))
+                if not sd:continue
+                gap=(sd-wd).total_seconds()/60
+                if gap>EVIDENCE_CONFLICT_WINDOW_MIN:break
+                reliable_full=(strong.get('班次类型')=='全程车' and strong.get('到达时间') not in {'','待确认'} and ('终点ETA' in strong.get('到达时间说明','') or '终点' in strong.get('班次类型判定依据','')))
+                if reliable_full:
+                    drop.add(i);removed+=1;break
+        final.extend(r for i,r in enumerate(ordered) if i not in drop)
+    final.sort(key=lambda r:(r.get('线路',''),r.get('发车时间',''),r.get('车牌号','')));return final,removed
 
 def seq_num(e):
     try:return int(e.get('physical_seq') or 0)
