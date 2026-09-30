@@ -13,6 +13,11 @@ excluded.update((x["plate"],x["departure"]) for x in audit if not x.get("eligibl
 import csv,statistics,re
 from collections import defaultdict
 with Path(str(base)+".csv").open(encoding="utf-8-sig",newline="") as f:rows=list(csv.DictReader(f))
+seen=set()
+for r in rows:
+ key=(r.get("车牌号"),r.get("方向"),r.get("发车时间"),r.get("班次类型"))
+ if key in seen:raise ValueError(f"Duplicate exported trip identity; review before ranking: {key}")
+ seen.add(key)
 groups=defaultdict(lambda:{"full":[],"short":[],"excluded":[]})
 for r in rows:
  p=r["车牌号"]
