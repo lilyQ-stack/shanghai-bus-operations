@@ -5,6 +5,7 @@ on:
       - '.github/workflows/audit-short-turn-20260929.yml'
       - 'src/audit_short_turn_20260929.py'
       - 'src/validate_short_turn_endpoints_20260929.py'
+      - 'src/screen_short_turn_ranking_20260929.py'
   workflow_dispatch:
 permissions:
   contents: write
@@ -18,11 +19,12 @@ jobs:
           python-version: '3.11'
       - run: python src/audit_short_turn_20260929.py
       - run: python src/validate_short_turn_endpoints_20260929.py
+      - run: python src/screen_short_turn_ranking_20260929.py
       - name: Persist evidence audit
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add 'data/export/2026-09-29-浦东35路-short-turn-audit.json' 'data/export/2026-09-29-浦东35路-combined-ranking.json' 'data/export/2026-09-29-浦东35路-endpoint-validation.json'
+          git add 'data/export/2026-09-29-浦东35路-short-turn-audit.json' 'data/export/2026-09-29-浦东35路-combined-ranking.json' 'data/export/2026-09-29-浦东35路-endpoint-validation.json' 'data/export/2026-09-29-浦东35路-validated-ranking.json'
           if ! git diff --cached --quiet; then
             git commit -m 'data: Sep 29 short-turn ranking evidence audit'
             git push
