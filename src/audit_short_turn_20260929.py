@@ -47,16 +47,16 @@ def crossing(plate,direction,dep,arrival,seq):
    elapsed=(at-dep).total_seconds()/60
    if elapsed>0:candidates.append(elapsed)
  return min(candidates) if candidates else None
-full=[r for r in rows if r["班次类型"]=="全程车" and value(re.search(r"\\d+",r.get("全程时间","")).group(0)) if re.search(r"\\d+",r.get("全程时间",""))]
+full=[r for r in rows if r["班次类型"]=="全程车" and value(re.search(r"\d+",r.get("全程时间","")).group(0)) if re.search(r"\d+",r.get("全程时间",""))]
 short=[r for r in rows if r["班次类型"]=="疑似区间车"]
 by_plate=defaultdict(lambda:{"full":[],"short":[],"excluded":[]})
 for r in full:
- m=re.search(r"\\d+",r["全程时间"])
+ m=re.search(r"\d+",r["全程时间"])
  if m:by_plate[r["车牌号"]]["full"].append(float(m.group()))
 report={"date":DATE,"route":ROUTE,"raw_samples":samples,"observed_plates":len({p for p,d in events}),"method":"Physical position=probe stop_seq-remaining_stops. Reference crossing must be bracketed by two same-trip observations <=15 min apart, <=10-stop progression; >=2 same-direction full-trip peers; >=25% route coverage; no unobserved crossing extrapolation.","short_turns":[]}
 for r in short:
  plate=r["车牌号"]; dep=minute(r["发车时间"]); arr=minute(r.get("区间站到达时间",""))
- match=re.search(r"seq(\\d+)",r.get("区间站",""))
+ match=re.search(r"seq(\d+)",r.get("区间站",""))
  seq=int(match.group(1)) if match else None
  direction=r["方向"]; reason=""
  if not dep or not arr or not seq:reason="Missing reliable turnaround arrival or physical sequence mapping"
@@ -68,7 +68,7 @@ for r in short:
    fd=minute(f["发车时间"]); fa=minute(f["到达时间"])
    if fa and fd and fa<fd:fa+=timedelta(days=1)
    segment=crossing(f["车牌号"],direction,fd,fa,seq)
-   total=value(re.search(r"\\d+",f["全程时间"]).group()) if re.search(r"\\d+",f["全程时间"]) else None
+   total=value(re.search(r"\d+",f["全程时间"]).group()) if re.search(r"\d+",f["全程时间"]) else None
    if segment and total and segment<total:peers.append((segment,total,f["车牌号"]))
   if len(peers)<2:reason="Fewer than 2 independently bracketed same-direction full-trip reference crossings"
   else:
