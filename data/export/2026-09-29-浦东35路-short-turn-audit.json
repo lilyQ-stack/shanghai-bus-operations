@@ -3,7 +3,7 @@
   "route": "浦东35路",
   "raw_samples": 98,
   "observed_plates": 30,
-  "method": "Physical position=probe stop_seq-remaining_stops. Reference crossing must be bracketed by two same-trip observations <=15 min apart, <=10-stop progression; >=2 same-direction full-trip peers; >=25% route coverage; no unobserved crossing extrapolation.",
+  "method": "Physical position=probe stop_seq-remaining_stops. Reference crossing must be bracketed by two same-trip observations <=15 min apart, <=10-stop progression; >=2 distinct same-direction full-trip reference vehicles departing within +/-90 min; >=25% route coverage; no unobserved crossing extrapolation.",
   "short_turns": [
     {
       "plate": "沪A11062A",
@@ -11,9 +11,11 @@
       "direction": "0",
       "turn_seq": 27,
       "segment_minutes": 68.0,
-      "reference_count": 39,
-      "reference_ratio_median": 2.517,
-      "standardized_full_minutes": 171.2,
+      "reference_count": 8,
+      "reference_vehicle_count": 8,
+      "reference_window_minutes": 90,
+      "reference_ratio_median": 2.287,
+      "standardized_full_minutes": 155.5,
       "eligible": true
     },
     {
@@ -22,9 +24,11 @@
       "direction": "1",
       "turn_seq": 22,
       "segment_minutes": 68.0,
-      "reference_count": 38,
-      "reference_ratio_median": 3.038,
-      "standardized_full_minutes": 206.6,
+      "reference_count": 8,
+      "reference_vehicle_count": 8,
+      "reference_window_minutes": 90,
+      "reference_ratio_median": 2.719,
+      "standardized_full_minutes": 184.9,
       "eligible": true
     },
     {
@@ -33,9 +37,11 @@
       "direction": "0",
       "turn_seq": 26,
       "segment_minutes": 52.0,
-      "reference_count": 39,
-      "reference_ratio_median": 2.618,
-      "standardized_full_minutes": 136.1,
+      "reference_count": 8,
+      "reference_vehicle_count": 8,
+      "reference_window_minutes": 90,
+      "reference_ratio_median": 2.567,
+      "standardized_full_minutes": 133.5,
       "eligible": true
     },
     {
@@ -52,9 +58,11 @@
       "direction": "0",
       "turn_seq": 31,
       "segment_minutes": 58.0,
-      "reference_count": 39,
-      "reference_ratio_median": 2.232,
-      "standardized_full_minutes": 129.4,
+      "reference_count": 8,
+      "reference_vehicle_count": 8,
+      "reference_window_minutes": 90,
+      "reference_ratio_median": 2.288,
+      "standardized_full_minutes": 132.7,
       "eligible": true
     },
     {
@@ -63,9 +71,11 @@
       "direction": "0",
       "turn_seq": 31,
       "segment_minutes": 53.0,
-      "reference_count": 38,
-      "reference_ratio_median": 2.232,
-      "standardized_full_minutes": 118.3,
+      "reference_count": 7,
+      "reference_vehicle_count": 7,
+      "reference_window_minutes": 90,
+      "reference_ratio_median": 2.28,
+      "standardized_full_minutes": 120.8,
       "eligible": true
     },
     {
@@ -74,9 +84,11 @@
       "direction": "0",
       "turn_seq": 27,
       "segment_minutes": 53.0,
-      "reference_count": 38,
-      "reference_ratio_median": 2.518,
-      "standardized_full_minutes": 133.4,
+      "reference_count": 6,
+      "reference_vehicle_count": 6,
+      "reference_window_minutes": 90,
+      "reference_ratio_median": 2.654,
+      "standardized_full_minutes": 140.7,
       "eligible": true
     }
   ],
