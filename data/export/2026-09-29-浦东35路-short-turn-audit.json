@@ -3,81 +3,82 @@
   "route": "浦东35路",
   "raw_samples": 98,
   "observed_plates": 30,
-  "distinct_stop_sequences_by_direction": {
-    "1": 17,
-    "0": 17
-  },
-  "method": "audit only: physical observation stop_seq is probe location, not necessarily actual vehicle position; do not calculate segment times without trip-aligned physical positions",
+  "method": "Physical position=probe stop_seq-remaining_stops. Reference crossing must be bracketed by two same-trip observations <=15 min apart, <=10-stop progression; >=2 same-direction full-trip peers; >=25% route coverage; no unobserved crossing extrapolation.",
   "short_turns": [
     {
       "plate": "沪A11062A",
       "departure": "06:36",
       "direction": "0",
-      "turn_stop": "物理seq27（站名待映射）",
-      "turn_arrival": "07:44",
-      "observation_count": 390,
-      "eligible_for_standardized_ranking": false,
-      "reason": "Need trip-aligned physical positions, matching same-direction same-segment full-trip reference and reliable elapsed time."
+      "turn_seq": 27,
+      "segment_minutes": 68.0,
+      "reference_count": 39,
+      "reference_ratio_median": 2.517,
+      "standardized_full_minutes": 171.2,
+      "eligible": true
     },
     {
       "plate": "沪A51682D",
       "departure": "07:12",
       "direction": "1",
-      "turn_stop": "物理seq22（站名待映射）",
-      "turn_arrival": "08:20",
-      "observation_count": 487,
-      "eligible_for_standardized_ranking": false,
-      "reason": "Need trip-aligned physical positions, matching same-direction same-segment full-trip reference and reliable elapsed time."
+      "turn_seq": 22,
+      "segment_minutes": 68.0,
+      "reference_count": 38,
+      "reference_ratio_median": 3.038,
+      "standardized_full_minutes": 206.6,
+      "eligible": true
     },
     {
       "plate": "沪A11062A",
       "departure": "09:24",
       "direction": "0",
-      "turn_stop": "物理seq26（站名待映射）",
-      "turn_arrival": "10:16",
-      "observation_count": 390,
-      "eligible_for_standardized_ranking": false,
-      "reason": "Need trip-aligned physical positions, matching same-direction same-segment full-trip reference and reliable elapsed time."
+      "turn_seq": 26,
+      "segment_minutes": 52.0,
+      "reference_count": 39,
+      "reference_ratio_median": 2.618,
+      "standardized_full_minutes": 136.1,
+      "eligible": true
     },
     {
       "plate": "沪A79307D",
       "departure": "12:30",
       "direction": "1",
-      "turn_stop": "沪南路华夏西路",
-      "turn_arrival": "",
-      "observation_count": 147,
-      "eligible_for_standardized_ranking": false,
-      "reason": "Need trip-aligned physical positions, matching same-direction same-segment full-trip reference and reliable elapsed time."
+      "turn_seq": null,
+      "eligible": false,
+      "reason": "Missing reliable turnaround arrival or physical sequence mapping"
     },
     {
       "plate": "沪A11062A",
       "departure": "15:35",
       "direction": "0",
-      "turn_stop": "物理seq31（站名待映射）",
-      "turn_arrival": "16:33",
-      "observation_count": 390,
-      "eligible_for_standardized_ranking": false,
-      "reason": "Need trip-aligned physical positions, matching same-direction same-segment full-trip reference and reliable elapsed time."
+      "turn_seq": 31,
+      "segment_minutes": 58.0,
+      "reference_count": 39,
+      "reference_ratio_median": 2.232,
+      "standardized_full_minutes": 129.4,
+      "eligible": true
     },
     {
       "plate": "沪A55102D",
       "departure": "19:10",
       "direction": "0",
-      "turn_stop": "物理seq31（站名待映射）",
-      "turn_arrival": "20:03",
-      "observation_count": 418,
-      "eligible_for_standardized_ranking": false,
-      "reason": "Need trip-aligned physical positions, matching same-direction same-segment full-trip reference and reliable elapsed time."
+      "turn_seq": 31,
+      "segment_minutes": 53.0,
+      "reference_count": 38,
+      "reference_ratio_median": 2.232,
+      "standardized_full_minutes": 118.3,
+      "eligible": true
     },
     {
       "plate": "沪A67057D",
       "departure": "19:30",
       "direction": "0",
-      "turn_stop": "物理seq27（站名待映射）",
-      "turn_arrival": "20:23",
-      "observation_count": 432,
-      "eligible_for_standardized_ranking": false,
-      "reason": "Need trip-aligned physical positions, matching same-direction same-segment full-trip reference and reliable elapsed time."
+      "turn_seq": 27,
+      "segment_minutes": 53.0,
+      "reference_count": 38,
+      "reference_ratio_median": 2.518,
+      "standardized_full_minutes": 133.4,
+      "eligible": true
     }
-  ]
+  ],
+  "eligible_short_turn_count": 6
 }
