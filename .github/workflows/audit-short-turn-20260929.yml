@@ -20,7 +20,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add 'data/export/2026-09-29-浦东35路-short-turn-audit.json'
+          git add 'data/export/2026-09-29-浦东35路-short-turn-audit.json' 'data/export/2026-09-29-浦东35路-combined-ranking.json'
           if ! git diff --cached --quiet; then
             git commit -m 'data: Sep 29 short-turn ranking evidence audit'
             git push
