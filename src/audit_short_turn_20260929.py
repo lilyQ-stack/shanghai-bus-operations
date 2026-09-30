@@ -53,7 +53,7 @@ by_plate=defaultdict(lambda:{"full":[],"short":[],"excluded":[]})
 for r in full:
  m=re.search(r"\d+",r["全程时间"])
  if m:by_plate[r["车牌号"]]["full"].append(float(m.group()))
-report={"date":DATE,"route":ROUTE,"raw_samples":samples,"observed_plates":len({p for p,d in events}),"method":"Physical position=probe stop_seq-remaining_stops. Reference crossing must be bracketed by two same-trip observations <=15 min apart, <=10-stop progression; >=2 same-direction full-trip peers; >=25% route coverage; no unobserved crossing extrapolation.","short_turns":[]}
+report={"date":DATE,"route":ROUTE,"raw_samples":samples,"observed_plates":len({p for p,d in events}),"method":"Physical position=probe stop_seq-remaining_stops. Reference crossing must be bracketed by two same-trip observations <=15 min apart, <=10-stop progression; >=2 distinct same-direction full-trip reference vehicles departing within +/-90 min; >=25% route coverage; no unobserved crossing extrapolation.","short_turns":[]}
 for r in short:
  plate=r["车牌号"]; dep=minute(r["发车时间"]); arr=minute(r.get("区间站到达时间",""))
  match=re.search(r"seq(\d+)",r.get("区间站",""))
@@ -69,8 +69,8 @@ for r in short:
    if fa and fd and fa<fd:fa+=timedelta(days=1)
    segment=crossing(f["车牌号"],direction,fd,fa,seq)
    total=value(re.search(r"\d+",f["全程时间"]).group()) if re.search(r"\d+",f["全程时间"]) else None
-   if segment and total and segment<total:peers.append((segment,total,f["车牌号"]))
-  if len(peers)<2:reason="Fewer than 2 independently bracketed same-direction full-trip reference crossings"
+   if segment and total and segment<total and fd and abs((fd-dep).total_seconds())<=90*60:peers.append((segment,total,f["车牌号"]))
+  if len({p for _,_,p in peers})<2:reason="Fewer than 2 distinct vehicles with bracketed same-direction full-trip crossings within +/-90 minutes"
   else:
    elapsed=(arr-dep).total_seconds()/60
    if elapsed<=0:reason="Nonpositive short-turn elapsed time"
@@ -78,7 +78,7 @@ for r in short:
     ratios=[total/segment for segment,total,p in peers]
     standardized=round(elapsed*statistics.median(ratios),1)
     by_plate[plate]["short"].append(standardized)
-    report["short_turns"].append({"plate":plate,"departure":r["发车时间"],"direction":direction,"turn_seq":seq,"segment_minutes":round(elapsed,1),"reference_count":len(peers),"reference_ratio_median":round(statistics.median(ratios),3),"standardized_full_minutes":standardized,"eligible":True})
+    report["short_turns"].append({"plate":plate,"departure":r["发车时间"],"direction":direction,"turn_seq":seq,"segment_minutes":round(elapsed,1),"reference_count":len(peers),"reference_vehicle_count":len({p for _,_,p in peers}),"reference_window_minutes":90,"reference_ratio_median":round(statistics.median(ratios),3),"standardized_full_minutes":standardized,"eligible":True})
     continue
  by_plate[plate]["excluded"].append(r["发车时间"])
  report["short_turns"].append({"plate":plate,"departure":r["发车时间"],"direction":direction,"turn_seq":seq,"eligible":False,"reason":reason})
@@ -91,7 +91,7 @@ for i,r in enumerate(eligible):
  r["rank"]=1+sum(x["average_standardized_minutes"]<r["average_standardized_minutes"] for x in eligible)
 for r in results:
  if "rank" not in r:r["rank"]=None
-ranking.write_text(json.dumps({"date":DATE,"route":ROUTE,"status":"conservative_partial_ranking","vehicles":sorted(results,key=lambda r:r["rank"] if r["rank"] else 999)},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+ranking.write_text(json.dumps({"date":DATE,"route":ROUTE,"status":"time_matched_provisional_ranking","vehicles":sorted(results,key=lambda r:r["rank"] if r["rank"] else 999)},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 report["eligible_short_turn_count"]=sum(bool(r["eligible"]) for r in report["short_turns"])
 out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 print(json.dumps({"samples":samples,"short_turns":len(short),"eligible":report["eligible_short_turn_count"],"ranking":str(ranking)},ensure_ascii=False))
