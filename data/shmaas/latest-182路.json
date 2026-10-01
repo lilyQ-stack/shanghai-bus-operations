@@ -1,152 +1,152 @@
 {
-  "sample_time_cst": "2026-10-01T16:52:09+08:00",
+  "sample_time_cst": "2026-10-01T17:02:05+08:00",
   "date_cst": "2026-10-01",
   "source": "https://api.shmaas.net",
   "route": "182路",
   "strategy": "rotating_every_5th_stop_plus_terminals",
-  "sampling_phase": 1,
+  "sampling_phase": 2,
   "sampling_stride": 5,
   "success": true,
   "requests": [
     {
       "endpoint": "querytrafficline",
-      "elapsed_ms": 1390
+      "elapsed_ms": 1071
     },
     {
       "endpoint": "querybusline",
       "direction": 0,
-      "elapsed_ms": 1376
+      "elapsed_ms": 947
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "start_143705",
       "probe_type": "rotating",
-      "elapsed_ms": 1408
+      "elapsed_ms": 1051
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143706",
+      "stop_id": "143725",
       "probe_type": "rotating",
-      "elapsed_ms": 1475
+      "elapsed_ms": 1044
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143708",
+      "stop_id": "143728",
       "probe_type": "rotating",
-      "elapsed_ms": 1231
+      "elapsed_ms": 1014
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143710",
+      "stop_id": "143711",
       "probe_type": "rotating",
-      "elapsed_ms": 1255
+      "elapsed_ms": 1024
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143733",
+      "stop_id": "143734",
       "probe_type": "rotating",
-      "elapsed_ms": 1612
+      "elapsed_ms": 1041
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143735",
+      "stop_id": "143716",
       "probe_type": "rotating",
-      "elapsed_ms": 1272
+      "elapsed_ms": 1039
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143738",
+      "stop_id": "143718",
       "probe_type": "rotating",
-      "elapsed_ms": 1576
+      "elapsed_ms": 1104
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
-      "stop_id": "143722",
+      "stop_id": "143723",
       "probe_type": "rotating",
-      "elapsed_ms": 1256
+      "elapsed_ms": 1024
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 0,
       "stop_id": "143724",
       "probe_type": "rotating",
-      "elapsed_ms": 1265
+      "elapsed_ms": 1001
     },
     {
       "endpoint": "querybusline",
       "direction": 1,
-      "elapsed_ms": 1184
+      "elapsed_ms": 982
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "start_143740",
       "probe_type": "rotating",
-      "elapsed_ms": 1318
+      "elapsed_ms": 1068
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143741",
+      "stop_id": "143742",
       "probe_type": "rotating",
-      "elapsed_ms": 1261
+      "elapsed_ms": 1075
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143765",
+      "stop_id": "143766",
       "probe_type": "rotating",
-      "elapsed_ms": 1591
+      "elapsed_ms": 1033
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143748",
+      "stop_id": "143767",
       "probe_type": "rotating",
-      "elapsed_ms": 1390
+      "elapsed_ms": 1082
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143770",
+      "stop_id": "143750",
       "probe_type": "rotating",
-      "elapsed_ms": 1265
+      "elapsed_ms": 991
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143753",
+      "stop_id": "143754",
       "probe_type": "rotating",
-      "elapsed_ms": 1286
+      "elapsed_ms": 1134
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143757",
+      "stop_id": "143758",
       "probe_type": "rotating",
-      "elapsed_ms": 1551
+      "elapsed_ms": 1028
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
-      "stop_id": "143773",
+      "stop_id": "143762",
       "probe_type": "rotating",
-      "elapsed_ms": 1363
+      "elapsed_ms": 1094
     },
     {
       "endpoint": "getbusstoparrivedetails",
       "direction": 1,
       "stop_id": "143763",
       "probe_type": "rotating",
-      "elapsed_ms": 1266
+      "elapsed_ms": 1033
     }
   ],
   "directions": [
@@ -156,7 +156,7 @@
       "end_stop": "金杨路金口路",
       "stop_count": 35,
       "sampled_stop_count": 9,
-      "sampling_phase": 1,
+      "sampling_phase": 2,
       "sampled_stops": [
         {
           "seq": 1,
@@ -166,51 +166,51 @@
           "ok": true
         },
         {
-          "seq": 2,
-          "stop_id": "143706",
-          "stop_name": "川环南路妙境路",
+          "seq": 3,
+          "stop_id": "143725",
+          "stop_name": "川环南路川沙路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 7,
-          "stop_id": "143708",
-          "stop_name": "新川路华城路",
+          "seq": 8,
+          "stop_id": "143728",
+          "stop_name": "新川路华东路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 12,
-          "stop_id": "143710",
-          "stop_name": "新德西路德川路",
+          "seq": 13,
+          "stop_id": "143711",
+          "stop_name": "德川路华夏东路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 17,
-          "stop_id": "143733",
-          "stop_name": "唐陆公路唐龙路",
+          "seq": 18,
+          "stop_id": "143734",
+          "stop_name": "唐陆公路龙东大道",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 22,
-          "stop_id": "143735",
-          "stop_name": "唐陆公路台桥路",
+          "seq": 23,
+          "stop_id": "143716",
+          "stop_name": "唐陆公路川桥路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 27,
-          "stop_id": "143738",
-          "stop_name": "博兴路凌河路",
+          "seq": 28,
+          "stop_id": "143718",
+          "stop_name": "博兴路东陆路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 32,
-          "stop_id": "143722",
-          "stop_name": "金杨路金业路",
+          "seq": 33,
+          "stop_id": "143723",
+          "stop_name": "金杨路金桥路",
           "probe_type": "rotating",
           "ok": true
         },
@@ -229,7 +229,7 @@
       "end_stop": "川沙客运站",
       "stop_count": 35,
       "sampled_stop_count": 9,
-      "sampling_phase": 1,
+      "sampling_phase": 2,
       "sampled_stops": [
         {
           "seq": 1,
@@ -239,51 +239,51 @@
           "ok": true
         },
         {
-          "seq": 2,
-          "stop_id": "143741",
-          "stop_name": "金杨路枣庄路",
+          "seq": 3,
+          "stop_id": "143742",
+          "stop_name": "金杨路金桥路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 7,
-          "stop_id": "143765",
-          "stop_name": "荷泽路长岛路",
+          "seq": 8,
+          "stop_id": "143766",
+          "stop_name": "博兴路东陆路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 12,
-          "stop_id": "143748",
-          "stop_name": "东陆路新金桥路",
+          "seq": 13,
+          "stop_id": "143767",
+          "stop_name": "唐陆公路川桥路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 17,
-          "stop_id": "143770",
-          "stop_name": "唐陆公路顾家浜路",
+          "seq": 18,
+          "stop_id": "143750",
+          "stop_name": "唐陆公路龙东大道",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 22,
-          "stop_id": "143753",
-          "stop_name": "唐陆公路南曹路",
+          "seq": 23,
+          "stop_id": "143754",
+          "stop_name": "德川路华夏东路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 27,
-          "stop_id": "143757",
-          "stop_name": "华夏三路城丰路",
+          "seq": 28,
+          "stop_id": "143758",
+          "stop_name": "新川路华东路",
           "probe_type": "rotating",
           "ok": true
         },
         {
-          "seq": 32,
-          "stop_id": "143773",
-          "stop_name": "川沙路南桥路",
+          "seq": 33,
+          "stop_id": "143762",
+          "stop_name": "川环南路川沙路",
           "probe_type": "rotating",
           "ok": true
         },
@@ -314,60 +314,60 @@
         {
           "direction": 1,
           "role": "current",
-          "stop_seq": 7,
-          "stop_id": "143765",
-          "stop_name": "荷泽路长岛路",
-          "arrive_time": "3",
-          "distance": "768",
-          "remaining_stops": 2,
+          "stop_seq": 13,
+          "stop_id": "143767",
+          "stop_name": "唐陆公路川桥路",
+          "arrive_time": "12",
+          "distance": "3359",
+          "remaining_stops": 4,
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "current",
-          "stop_seq": 12,
-          "stop_id": "143748",
-          "stop_name": "东陆路新金桥路",
-          "arrive_time": "19",
-          "distance": "5071",
-          "remaining_stops": 7,
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 1,
-          "role": "current",
-          "stop_seq": 17,
-          "stop_id": "143770",
-          "stop_name": "唐陆公路顾家浜路",
-          "arrive_time": "28",
-          "distance": "8971",
-          "remaining_stops": 12,
+          "stop_seq": 18,
+          "stop_id": "143750",
+          "stop_name": "唐陆公路龙东大道",
+          "arrive_time": "26",
+          "distance": "6972",
+          "remaining_stops": 9,
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "next",
-          "stop_seq": 22,
-          "stop_id": "143753",
-          "stop_name": "唐陆公路南曹路",
-          "arrive_time": "40",
-          "distance": "12806",
-          "remaining_stops": "17",
+          "stop_seq": 23,
+          "stop_id": "143754",
+          "stop_name": "德川路华夏东路",
+          "arrive_time": "45",
+          "distance": "11196",
+          "remaining_stops": "14",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "next",
-          "stop_seq": 27,
-          "stop_id": "143757",
-          "stop_name": "华夏三路城丰路",
-          "arrive_time": "50",
-          "distance": "15933",
-          "remaining_stops": "22",
+          "stop_seq": 28,
+          "stop_id": "143758",
+          "stop_name": "新川路华东路",
+          "arrive_time": "48",
+          "distance": "13515",
+          "remaining_stops": "19",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "next",
+          "stop_seq": 33,
+          "stop_id": "143762",
+          "stop_name": "川环南路川沙路",
+          "arrive_time": "61",
+          "distance": "15886",
+          "remaining_stops": "24",
           "service_hints": [],
           "probe_type": "rotating"
         }
@@ -390,36 +390,36 @@
         {
           "direction": 1,
           "role": "current",
-          "stop_seq": 22,
-          "stop_id": "143753",
-          "stop_name": "唐陆公路南曹路",
-          "arrive_time": "10",
-          "distance": "3331",
-          "remaining_stops": 5,
+          "stop_seq": 23,
+          "stop_id": "143754",
+          "stop_name": "德川路华夏东路",
+          "arrive_time": "4",
+          "distance": "1351",
+          "remaining_stops": 2,
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "current",
-          "stop_seq": 27,
-          "stop_id": "143757",
-          "stop_name": "华夏三路城丰路",
-          "arrive_time": "20",
-          "distance": "6458",
-          "remaining_stops": 10,
+          "stop_seq": 28,
+          "stop_id": "143758",
+          "stop_name": "新川路华东路",
+          "arrive_time": "15",
+          "distance": "3671",
+          "remaining_stops": 7,
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
-          "role": "next",
-          "stop_seq": 32,
-          "stop_id": "143773",
-          "stop_name": "川沙路南桥路",
-          "arrive_time": "28",
-          "distance": "8570",
-          "remaining_stops": "15",
+          "role": "current",
+          "stop_seq": 33,
+          "stop_id": "143762",
+          "stop_name": "川环南路川沙路",
+          "arrive_time": "25",
+          "distance": "6041",
+          "remaining_stops": 12,
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -429,9 +429,9 @@
           "stop_seq": 35,
           "stop_id": "143763",
           "stop_name": "川沙客运站",
-          "arrive_time": "35",
-          "distance": "10167",
-          "remaining_stops": "18",
+          "arrive_time": "28",
+          "distance": "7002",
+          "remaining_stops": "14",
           "service_hints": [],
           "probe_type": "rotating"
         }
@@ -444,21 +444,23 @@
         "沪A32298D"
       ],
       "directions": [
-        0
+        0,
+        1
       ],
       "roles": [
         "current",
+        "dispatch",
         "next"
       ],
       "observations": [
         {
           "direction": 0,
           "role": "current",
-          "stop_seq": 7,
-          "stop_id": "143708",
-          "stop_name": "新川路华城路",
+          "stop_seq": 13,
+          "stop_id": "143711",
+          "stop_name": "德川路华夏东路",
           "arrive_time": "5",
-          "distance": "1193",
+          "distance": "1408",
           "remaining_stops": 3,
           "service_hints": [],
           "probe_type": "rotating"
@@ -466,23 +468,11 @@
         {
           "direction": 0,
           "role": "current",
-          "stop_seq": 12,
-          "stop_id": "143710",
-          "stop_name": "新德西路德川路",
-          "arrive_time": "14",
-          "distance": "3235",
-          "remaining_stops": 8,
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 0,
-          "role": "current",
-          "stop_seq": 17,
-          "stop_id": "143733",
-          "stop_name": "唐陆公路唐龙路",
-          "arrive_time": "27",
-          "distance": "7559",
+          "stop_seq": 23,
+          "stop_id": "143716",
+          "stop_name": "唐陆公路川桥路",
+          "arrive_time": "36",
+          "distance": "9309",
           "remaining_stops": 13,
           "service_hints": [],
           "probe_type": "rotating"
@@ -490,17 +480,118 @@
         {
           "direction": 0,
           "role": "next",
-          "stop_seq": 22,
-          "stop_id": "143735",
-          "stop_name": "唐陆公路台桥路",
-          "arrive_time": "37",
-          "distance": "11075",
+          "stop_seq": 28,
+          "stop_id": "143718",
+          "stop_name": "博兴路东陆路",
+          "arrive_time": "56",
+          "distance": "13950",
           "remaining_stops": "18",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 1,
+          "stop_id": "start_143740",
+          "stop_name": "金杨路金口路",
+          "dispatch_time": "18:05",
+          "dispatch_countdown": "剩余1小时3分钟",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 3,
+          "stop_id": "143742",
+          "stop_name": "金杨路金桥路",
+          "dispatch_time": "18:05",
+          "dispatch_countdown": "剩余1小时3分钟",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 8,
+          "stop_id": "143766",
+          "stop_name": "博兴路东陆路",
+          "dispatch_time": "18:05",
+          "dispatch_countdown": "剩余1小时3分钟",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 13,
+          "stop_id": "143767",
+          "stop_name": "唐陆公路川桥路",
+          "dispatch_time": "18:05",
+          "dispatch_countdown": "剩余1小时3分钟",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 18,
+          "stop_id": "143750",
+          "stop_name": "唐陆公路龙东大道",
+          "dispatch_time": "18:05",
+          "dispatch_countdown": "剩余1小时3分钟",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 23,
+          "stop_id": "143754",
+          "stop_name": "德川路华夏东路",
+          "dispatch_time": "18:05",
+          "dispatch_countdown": "剩余1小时3分钟",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 28,
+          "stop_id": "143758",
+          "stop_name": "新川路华东路",
+          "dispatch_time": "18:05",
+          "dispatch_countdown": "剩余1小时3分钟",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 33,
+          "stop_id": "143762",
+          "stop_name": "川环南路川沙路",
+          "dispatch_time": "18:05",
+          "dispatch_countdown": "剩余1小时3分钟",
+          "service_hints": [],
+          "probe_type": "rotating"
+        },
+        {
+          "direction": 1,
+          "role": "dispatch",
+          "stop_seq": 35,
+          "stop_id": "143763",
+          "stop_name": "川沙客运站",
+          "dispatch_time": "18:05",
+          "dispatch_countdown": "剩余1小时3分钟",
           "service_hints": [],
           "probe_type": "rotating"
         }
       ],
-      "dispatch_times": []
+      "dispatch_times": [
+        "18:05"
+      ]
     },
     {
       "plate": "沪A35717D",
@@ -521,84 +612,84 @@
           "stop_id": "start_143705",
           "stop_name": "川沙客运站",
           "dispatch_time": "17:08",
-          "dispatch_countdown": "剩余16分钟",
+          "dispatch_countdown": "剩余6分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 2,
-          "stop_id": "143706",
-          "stop_name": "川环南路妙境路",
+          "stop_seq": 3,
+          "stop_id": "143725",
+          "stop_name": "川环南路川沙路",
           "dispatch_time": "17:08",
-          "dispatch_countdown": "剩余16分钟",
+          "dispatch_countdown": "剩余6分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 7,
-          "stop_id": "143708",
-          "stop_name": "新川路华城路",
+          "stop_seq": 8,
+          "stop_id": "143728",
+          "stop_name": "新川路华东路",
           "dispatch_time": "17:08",
-          "dispatch_countdown": "剩余16分钟",
+          "dispatch_countdown": "剩余6分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 12,
-          "stop_id": "143710",
-          "stop_name": "新德西路德川路",
+          "stop_seq": 13,
+          "stop_id": "143711",
+          "stop_name": "德川路华夏东路",
           "dispatch_time": "17:08",
-          "dispatch_countdown": "剩余16分钟",
+          "dispatch_countdown": "剩余6分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 17,
-          "stop_id": "143733",
-          "stop_name": "唐陆公路唐龙路",
+          "stop_seq": 18,
+          "stop_id": "143734",
+          "stop_name": "唐陆公路龙东大道",
           "dispatch_time": "17:08",
-          "dispatch_countdown": "剩余16分钟",
+          "dispatch_countdown": "剩余6分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 22,
-          "stop_id": "143735",
-          "stop_name": "唐陆公路台桥路",
+          "stop_seq": 23,
+          "stop_id": "143716",
+          "stop_name": "唐陆公路川桥路",
           "dispatch_time": "17:08",
-          "dispatch_countdown": "剩余16分钟",
+          "dispatch_countdown": "剩余6分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 27,
-          "stop_id": "143738",
-          "stop_name": "博兴路凌河路",
+          "stop_seq": 28,
+          "stop_id": "143718",
+          "stop_name": "博兴路东陆路",
           "dispatch_time": "17:08",
-          "dispatch_countdown": "剩余16分钟",
+          "dispatch_countdown": "剩余6分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 32,
-          "stop_id": "143722",
-          "stop_name": "金杨路金业路",
+          "stop_seq": 33,
+          "stop_id": "143723",
+          "stop_name": "金杨路金桥路",
           "dispatch_time": "17:08",
-          "dispatch_countdown": "剩余16分钟",
+          "dispatch_countdown": "剩余6分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -609,7 +700,7 @@
           "stop_id": "143724",
           "stop_name": "金杨路金口路",
           "dispatch_time": "17:08",
-          "dispatch_countdown": "剩余16分钟",
+          "dispatch_countdown": "剩余6分钟",
           "service_hints": [],
           "probe_type": "rotating"
         }
@@ -637,84 +728,84 @@
           "stop_id": "start_143705",
           "stop_name": "川沙客运站",
           "dispatch_time": "17:36",
-          "dispatch_countdown": "剩余44分钟",
+          "dispatch_countdown": "剩余34分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 2,
-          "stop_id": "143706",
-          "stop_name": "川环南路妙境路",
+          "stop_seq": 3,
+          "stop_id": "143725",
+          "stop_name": "川环南路川沙路",
           "dispatch_time": "17:36",
-          "dispatch_countdown": "剩余44分钟",
+          "dispatch_countdown": "剩余34分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 7,
-          "stop_id": "143708",
-          "stop_name": "新川路华城路",
+          "stop_seq": 8,
+          "stop_id": "143728",
+          "stop_name": "新川路华东路",
           "dispatch_time": "17:36",
-          "dispatch_countdown": "剩余44分钟",
+          "dispatch_countdown": "剩余34分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 12,
-          "stop_id": "143710",
-          "stop_name": "新德西路德川路",
+          "stop_seq": 13,
+          "stop_id": "143711",
+          "stop_name": "德川路华夏东路",
           "dispatch_time": "17:36",
-          "dispatch_countdown": "剩余44分钟",
+          "dispatch_countdown": "剩余34分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 17,
-          "stop_id": "143733",
-          "stop_name": "唐陆公路唐龙路",
+          "stop_seq": 18,
+          "stop_id": "143734",
+          "stop_name": "唐陆公路龙东大道",
           "dispatch_time": "17:36",
-          "dispatch_countdown": "剩余44分钟",
+          "dispatch_countdown": "剩余34分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 22,
-          "stop_id": "143735",
-          "stop_name": "唐陆公路台桥路",
+          "stop_seq": 23,
+          "stop_id": "143716",
+          "stop_name": "唐陆公路川桥路",
           "dispatch_time": "17:36",
-          "dispatch_countdown": "剩余44分钟",
+          "dispatch_countdown": "剩余34分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 27,
-          "stop_id": "143738",
-          "stop_name": "博兴路凌河路",
+          "stop_seq": 28,
+          "stop_id": "143718",
+          "stop_name": "博兴路东陆路",
           "dispatch_time": "17:36",
-          "dispatch_countdown": "剩余44分钟",
+          "dispatch_countdown": "剩余34分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 32,
-          "stop_id": "143722",
-          "stop_name": "金杨路金业路",
+          "stop_seq": 33,
+          "stop_id": "143723",
+          "stop_name": "金杨路金桥路",
           "dispatch_time": "17:36",
-          "dispatch_countdown": "剩余44分钟",
+          "dispatch_countdown": "剩余34分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -725,7 +816,7 @@
           "stop_id": "143724",
           "stop_name": "金杨路金口路",
           "dispatch_time": "17:36",
-          "dispatch_countdown": "剩余44分钟",
+          "dispatch_countdown": "剩余34分钟",
           "service_hints": [],
           "probe_type": "rotating"
         }
@@ -752,36 +843,24 @@
         {
           "direction": 0,
           "role": "current",
-          "stop_seq": 22,
-          "stop_id": "143735",
-          "stop_name": "唐陆公路台桥路",
-          "arrive_time": "8",
-          "distance": "3031",
-          "remaining_stops": 4,
+          "stop_seq": 28,
+          "stop_id": "143718",
+          "stop_name": "博兴路东陆路",
+          "arrive_time": "18",
+          "distance": "4174",
+          "remaining_stops": 5,
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "next",
-          "stop_seq": 27,
-          "stop_id": "143738",
-          "stop_name": "博兴路凌河路",
-          "arrive_time": "24",
-          "distance": "7700",
-          "remaining_stops": "9",
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 0,
-          "role": "next",
-          "stop_seq": 32,
-          "stop_id": "143722",
-          "stop_name": "金杨路金业路",
-          "arrive_time": "33",
-          "distance": "10173",
-          "remaining_stops": "14",
+          "stop_seq": 33,
+          "stop_id": "143723",
+          "stop_name": "金杨路金桥路",
+          "arrive_time": "32",
+          "distance": "6838",
+          "remaining_stops": "10",
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -791,9 +870,9 @@
           "stop_seq": 35,
           "stop_id": "143724",
           "stop_name": "金杨路金口路",
-          "arrive_time": "38",
-          "distance": "11584",
-          "remaining_stops": "17",
+          "arrive_time": "37",
+          "distance": "7564",
+          "remaining_stops": "12",
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -804,84 +883,84 @@
           "stop_id": "start_143740",
           "stop_name": "金杨路金口路",
           "dispatch_time": "17:45",
-          "dispatch_countdown": "剩余53分钟",
+          "dispatch_countdown": "剩余43分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 2,
-          "stop_id": "143741",
-          "stop_name": "金杨路枣庄路",
+          "stop_seq": 3,
+          "stop_id": "143742",
+          "stop_name": "金杨路金桥路",
           "dispatch_time": "17:45",
-          "dispatch_countdown": "剩余53分钟",
+          "dispatch_countdown": "剩余43分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 7,
-          "stop_id": "143765",
-          "stop_name": "荷泽路长岛路",
+          "stop_seq": 8,
+          "stop_id": "143766",
+          "stop_name": "博兴路东陆路",
           "dispatch_time": "17:45",
-          "dispatch_countdown": "剩余53分钟",
+          "dispatch_countdown": "剩余43分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 12,
-          "stop_id": "143748",
-          "stop_name": "东陆路新金桥路",
+          "stop_seq": 13,
+          "stop_id": "143767",
+          "stop_name": "唐陆公路川桥路",
           "dispatch_time": "17:45",
-          "dispatch_countdown": "剩余53分钟",
+          "dispatch_countdown": "剩余43分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 17,
-          "stop_id": "143770",
-          "stop_name": "唐陆公路顾家浜路",
+          "stop_seq": 18,
+          "stop_id": "143750",
+          "stop_name": "唐陆公路龙东大道",
           "dispatch_time": "17:45",
-          "dispatch_countdown": "剩余53分钟",
+          "dispatch_countdown": "剩余43分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 22,
-          "stop_id": "143753",
-          "stop_name": "唐陆公路南曹路",
+          "stop_seq": 23,
+          "stop_id": "143754",
+          "stop_name": "德川路华夏东路",
           "dispatch_time": "17:45",
-          "dispatch_countdown": "剩余53分钟",
+          "dispatch_countdown": "剩余43分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 27,
-          "stop_id": "143757",
-          "stop_name": "华夏三路城丰路",
+          "stop_seq": 28,
+          "stop_id": "143758",
+          "stop_name": "新川路华东路",
           "dispatch_time": "17:45",
-          "dispatch_countdown": "剩余53分钟",
+          "dispatch_countdown": "剩余43分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 32,
-          "stop_id": "143773",
-          "stop_name": "川沙路南桥路",
+          "stop_seq": 33,
+          "stop_id": "143762",
+          "stop_name": "川环南路川沙路",
           "dispatch_time": "17:45",
-          "dispatch_countdown": "剩余53分钟",
+          "dispatch_countdown": "剩余43分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -892,7 +971,7 @@
           "stop_id": "143763",
           "stop_name": "川沙客运站",
           "dispatch_time": "17:45",
-          "dispatch_countdown": "剩余53分钟",
+          "dispatch_countdown": "剩余43分钟",
           "service_hints": [],
           "probe_type": "rotating"
         }
@@ -920,84 +999,84 @@
           "stop_id": "start_143705",
           "stop_name": "川沙客运站",
           "dispatch_time": "18:04",
-          "dispatch_countdown": "剩余1小时12分钟",
+          "dispatch_countdown": "剩余1小时2分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 2,
-          "stop_id": "143706",
-          "stop_name": "川环南路妙境路",
+          "stop_seq": 3,
+          "stop_id": "143725",
+          "stop_name": "川环南路川沙路",
           "dispatch_time": "18:04",
-          "dispatch_countdown": "剩余1小时12分钟",
+          "dispatch_countdown": "剩余1小时2分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 7,
-          "stop_id": "143708",
-          "stop_name": "新川路华城路",
+          "stop_seq": 8,
+          "stop_id": "143728",
+          "stop_name": "新川路华东路",
           "dispatch_time": "18:04",
-          "dispatch_countdown": "剩余1小时12分钟",
+          "dispatch_countdown": "剩余1小时2分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 12,
-          "stop_id": "143710",
-          "stop_name": "新德西路德川路",
+          "stop_seq": 13,
+          "stop_id": "143711",
+          "stop_name": "德川路华夏东路",
           "dispatch_time": "18:04",
-          "dispatch_countdown": "剩余1小时12分钟",
+          "dispatch_countdown": "剩余1小时2分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 17,
-          "stop_id": "143733",
-          "stop_name": "唐陆公路唐龙路",
+          "stop_seq": 18,
+          "stop_id": "143734",
+          "stop_name": "唐陆公路龙东大道",
           "dispatch_time": "18:04",
-          "dispatch_countdown": "剩余1小时12分钟",
+          "dispatch_countdown": "剩余1小时2分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 22,
-          "stop_id": "143735",
-          "stop_name": "唐陆公路台桥路",
+          "stop_seq": 23,
+          "stop_id": "143716",
+          "stop_name": "唐陆公路川桥路",
           "dispatch_time": "18:04",
-          "dispatch_countdown": "剩余1小时12分钟",
+          "dispatch_countdown": "剩余1小时2分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 27,
-          "stop_id": "143738",
-          "stop_name": "博兴路凌河路",
+          "stop_seq": 28,
+          "stop_id": "143718",
+          "stop_name": "博兴路东陆路",
           "dispatch_time": "18:04",
-          "dispatch_countdown": "剩余1小时12分钟",
+          "dispatch_countdown": "剩余1小时2分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 0,
           "role": "dispatch",
-          "stop_seq": 32,
-          "stop_id": "143722",
-          "stop_name": "金杨路金业路",
+          "stop_seq": 33,
+          "stop_id": "143723",
+          "stop_name": "金杨路金桥路",
           "dispatch_time": "18:04",
-          "dispatch_countdown": "剩余1小时12分钟",
+          "dispatch_countdown": "剩余1小时2分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -1008,7 +1087,7 @@
           "stop_id": "143724",
           "stop_name": "金杨路金口路",
           "dispatch_time": "18:04",
-          "dispatch_countdown": "剩余1小时12分钟",
+          "dispatch_countdown": "剩余1小时2分钟",
           "service_hints": [],
           "probe_type": "rotating"
         }
@@ -1034,24 +1113,12 @@
         {
           "direction": 0,
           "role": "current",
-          "stop_seq": 27,
-          "stop_id": "143738",
-          "stop_name": "博兴路凌河路",
-          "arrive_time": "0",
-          "distance": "0",
-          "remaining_stops": 0,
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 0,
-          "role": "current",
-          "stop_seq": 32,
-          "stop_id": "143722",
-          "stop_name": "金杨路金业路",
-          "arrive_time": "8",
-          "distance": "2490",
-          "remaining_stops": 5,
+          "stop_seq": 33,
+          "stop_id": "143723",
+          "stop_name": "金杨路金桥路",
+          "arrive_time": "1",
+          "distance": "127",
+          "remaining_stops": 1,
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -1061,9 +1128,9 @@
           "stop_seq": 35,
           "stop_id": "143724",
           "stop_name": "金杨路金口路",
-          "arrive_time": "13",
-          "distance": "3852",
-          "remaining_stops": 8,
+          "arrive_time": "5",
+          "distance": "852",
+          "remaining_stops": 3,
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -1074,84 +1141,84 @@
           "stop_id": "start_143740",
           "stop_name": "金杨路金口路",
           "dispatch_time": "17:20",
-          "dispatch_countdown": "剩余28分钟",
+          "dispatch_countdown": "剩余18分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 2,
-          "stop_id": "143741",
-          "stop_name": "金杨路枣庄路",
+          "stop_seq": 3,
+          "stop_id": "143742",
+          "stop_name": "金杨路金桥路",
           "dispatch_time": "17:20",
-          "dispatch_countdown": "剩余28分钟",
+          "dispatch_countdown": "剩余18分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 7,
-          "stop_id": "143765",
-          "stop_name": "荷泽路长岛路",
+          "stop_seq": 8,
+          "stop_id": "143766",
+          "stop_name": "博兴路东陆路",
           "dispatch_time": "17:20",
-          "dispatch_countdown": "剩余28分钟",
+          "dispatch_countdown": "剩余18分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 12,
-          "stop_id": "143748",
-          "stop_name": "东陆路新金桥路",
+          "stop_seq": 13,
+          "stop_id": "143767",
+          "stop_name": "唐陆公路川桥路",
           "dispatch_time": "17:20",
-          "dispatch_countdown": "剩余28分钟",
+          "dispatch_countdown": "剩余18分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 17,
-          "stop_id": "143770",
-          "stop_name": "唐陆公路顾家浜路",
+          "stop_seq": 18,
+          "stop_id": "143750",
+          "stop_name": "唐陆公路龙东大道",
           "dispatch_time": "17:20",
-          "dispatch_countdown": "剩余28分钟",
+          "dispatch_countdown": "剩余18分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 22,
-          "stop_id": "143753",
-          "stop_name": "唐陆公路南曹路",
+          "stop_seq": 23,
+          "stop_id": "143754",
+          "stop_name": "德川路华夏东路",
           "dispatch_time": "17:20",
-          "dispatch_countdown": "剩余28分钟",
+          "dispatch_countdown": "剩余18分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 27,
-          "stop_id": "143757",
-          "stop_name": "华夏三路城丰路",
+          "stop_seq": 28,
+          "stop_id": "143758",
+          "stop_name": "新川路华东路",
           "dispatch_time": "17:20",
-          "dispatch_countdown": "剩余28分钟",
+          "dispatch_countdown": "剩余18分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
           "role": "dispatch",
-          "stop_seq": 32,
-          "stop_id": "143773",
-          "stop_name": "川沙路南桥路",
+          "stop_seq": 33,
+          "stop_id": "143762",
+          "stop_name": "川环南路川沙路",
           "dispatch_time": "17:20",
-          "dispatch_countdown": "剩余28分钟",
+          "dispatch_countdown": "剩余18分钟",
           "service_hints": [],
           "probe_type": "rotating"
         },
@@ -1162,7 +1229,7 @@
           "stop_id": "143763",
           "stop_name": "川沙客运站",
           "dispatch_time": "17:20",
-          "dispatch_countdown": "剩余28分钟",
+          "dispatch_countdown": "剩余18分钟",
           "service_hints": [],
           "probe_type": "rotating"
         }
@@ -1186,24 +1253,12 @@
         {
           "direction": 1,
           "role": "current",
-          "stop_seq": 32,
-          "stop_id": "143773",
-          "stop_name": "川沙路南桥路",
-          "arrive_time": "2",
-          "distance": "735",
-          "remaining_stops": 2,
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 1,
-          "role": "current",
           "stop_seq": 35,
           "stop_id": "143763",
           "stop_name": "川沙客运站",
-          "arrive_time": "10",
-          "distance": "2332",
-          "remaining_stops": 5,
+          "arrive_time": "1",
+          "distance": "566",
+          "remaining_stops": 1,
           "service_hints": [],
           "probe_type": "rotating"
         }
@@ -1219,112 +1274,60 @@
         1
       ],
       "roles": [
-        "dispatch"
+        "current",
+        "next"
       ],
       "observations": [
         {
           "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 1,
-          "stop_id": "start_143740",
-          "stop_name": "金杨路金口路",
-          "dispatch_time": "17:00",
-          "dispatch_countdown": "剩余8分钟",
+          "role": "current",
+          "stop_seq": 3,
+          "stop_id": "143742",
+          "stop_name": "金杨路金桥路",
+          "arrive_time": "4",
+          "distance": "1125",
+          "remaining_stops": 2,
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 2,
-          "stop_id": "143741",
-          "stop_name": "金杨路枣庄路",
-          "dispatch_time": "17:00",
-          "dispatch_countdown": "剩余8分钟",
+          "role": "current",
+          "stop_seq": 8,
+          "stop_id": "143766",
+          "stop_name": "博兴路东陆路",
+          "arrive_time": "17",
+          "distance": "3828",
+          "remaining_stops": 7,
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 7,
-          "stop_id": "143765",
-          "stop_name": "荷泽路长岛路",
-          "dispatch_time": "17:00",
-          "dispatch_countdown": "剩余8分钟",
+          "role": "next",
+          "stop_seq": 13,
+          "stop_id": "143767",
+          "stop_name": "唐陆公路川桥路",
+          "arrive_time": "38",
+          "distance": "8431",
+          "remaining_stops": "12",
           "service_hints": [],
           "probe_type": "rotating"
         },
         {
           "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 12,
-          "stop_id": "143748",
-          "stop_name": "东陆路新金桥路",
-          "dispatch_time": "17:00",
-          "dispatch_countdown": "剩余8分钟",
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 17,
-          "stop_id": "143770",
-          "stop_name": "唐陆公路顾家浜路",
-          "dispatch_time": "17:00",
-          "dispatch_countdown": "剩余8分钟",
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 22,
-          "stop_id": "143753",
-          "stop_name": "唐陆公路南曹路",
-          "dispatch_time": "17:00",
-          "dispatch_countdown": "剩余8分钟",
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 27,
-          "stop_id": "143757",
-          "stop_name": "华夏三路城丰路",
-          "dispatch_time": "17:00",
-          "dispatch_countdown": "剩余8分钟",
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 32,
-          "stop_id": "143773",
-          "stop_name": "川沙路南桥路",
-          "dispatch_time": "17:00",
-          "dispatch_countdown": "剩余8分钟",
-          "service_hints": [],
-          "probe_type": "rotating"
-        },
-        {
-          "direction": 1,
-          "role": "dispatch",
-          "stop_seq": 35,
-          "stop_id": "143763",
-          "stop_name": "川沙客运站",
-          "dispatch_time": "17:00",
-          "dispatch_countdown": "剩余8分钟",
+          "role": "next",
+          "stop_seq": 18,
+          "stop_id": "143750",
+          "stop_name": "唐陆公路龙东大道",
+          "arrive_time": "45",
+          "distance": "12044",
+          "remaining_stops": "17",
           "service_hints": [],
           "probe_type": "rotating"
         }
       ],
-      "dispatch_times": [
-        "17:00"
-      ]
+      "dispatch_times": []
     }
   ],
   "errors": [],
@@ -1335,6 +1338,6 @@
   "unique_vehicle_count": 10,
   "request_count": 21,
   "failed_sample_count": 0,
-  "avg_request_elapsed_ms": 1361,
-  "max_request_elapsed_ms": 1612
+  "avg_request_elapsed_ms": 1042,
+  "max_request_elapsed_ms": 1134
 }
