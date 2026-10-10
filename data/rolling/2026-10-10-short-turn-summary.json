@@ -1,6 +1,6 @@
 {
   "date_cst": "2026-10-10",
-  "generated_at_cst": "2026-10-10T14:16:56+08:00",
+  "generated_at_cst": "2026-10-10T20:42:53+08:00",
   "provisional": true,
   "counting_unit": "trip",
   "trip_key": [
@@ -17,16 +17,35 @@
   ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": "2026-10-10T14:03:12+08:00",
-      "candidate_count": 0,
-      "trip_count": 0,
-      "vehicle_count": 0,
-      "candidates": []
+      "cutoff_cst": "2026-10-10T20:40:42+08:00",
+      "candidate_count": 2,
+      "trip_count": 2,
+      "vehicle_count": 2,
+      "candidates": [
+        {
+          "plate": "沪A55150D",
+          "direction": 1,
+          "departure": "10:20",
+          "origin": "锦带路迎春路（浦东新区办公中心）",
+          "destination": "港城路地铁站",
+          "reason": "原方向在全程39%处后消失；随后反向物理轨迹由seq26推进至seq34，推进8站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A56630D",
+          "direction": 1,
+          "departure": "10:45",
+          "origin": "锦带路迎春路（浦东新区办公中心）",
+          "destination": "港城路地铁站",
+          "reason": "原方向在全程34%处后消失；随后反向物理轨迹由seq23推进至seq37，推进14站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        }
+      ]
     },
     "浦东35路": {
-      "cutoff_cst": "2026-10-10T14:03:41+08:00",
-      "candidate_count": 5,
-      "trip_count": 5,
+      "cutoff_cst": "2026-10-10T20:41:11+08:00",
+      "candidate_count": 6,
+      "trip_count": 6,
       "vehicle_count": 4,
       "candidates": [
         {
@@ -71,7 +90,16 @@
           "departure": "12:30",
           "origin": "康恩路康浦路",
           "destination": "东高路张杨北路",
-          "reason": "原方向在全程34%处后消失；随后反向物理轨迹由seq38推进至seq44，推进6站，达到≥2站确认条件",
+          "reason": "原方向在全程34%处后消失；随后反向物理轨迹由seq38推进至seq56，推进18站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A11062A",
+          "direction": 0,
+          "departure": "15:35",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程43%处后消失；随后反向物理轨迹由seq28推进至seq64，推进36站，达到≥2站确认条件",
           "last_reliable_stop": ""
         }
       ]
