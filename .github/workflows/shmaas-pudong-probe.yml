@@ -1,0 +1,43 @@
+name: SHMAAS Pudong Discovery Probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/shmaas-pudong-probe.yml'
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe search endpoint
+        run: |
+          python - <<'PY'
+          import json, urllib.request, datetime, pathlib
+          base='https://api.shmaas.net/traffic/v2/querytrafficline'
+          headers={'Content-Type':'application/json','X-Saic-CityCode':'310100','User-Agent':'shanghai-bus-operations/1.0'}
+          results=[]
+          for term in ['浦东','浦东78路','36930']:
+              row={'keyword':term}
+              try:
+                  payload=json.dumps({'keywords':term,'type':0,'pageNo':1,'pageSize':20},ensure_ascii=False).encode()
+                  req=urllib.request.Request(base,data=payload,headers=headers,method='POST')
+                  with urllib.request.urlopen(req,timeout=15) as resp: data=json.load(resp)
+                  body=data.get('data') or {}
+                  row.update({'http':'ok','errCode':data.get('errCode'),'errMsg':data.get('errMsg'),'data_keys':list(body),'trafficStop_count':len(body.get('trafficStop') or []),'trafficStop_preview':[]})
+                  for item in (body.get('trafficStop') or [])[:8]:
+                      row['trafficStop_preview'].append({'lineInfo':item.get('lineInfo'),'stopLineInfo':(item.get('stopLineInfo') or [])[:5]})
+              except Exception as exc: row['error']=str(exc)
+              results.append(row)
+          p=pathlib.Path('data/probes/shmaas-pudong-search.json');p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps({'tested_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'results':results},ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(results,ensure_ascii=False)[:3500])
+          PY
+      - name: Commit probe output
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/probes/shmaas-pudong-search.json
+          git diff --cached --quiet || (git commit -m 'data: SHMAAS Pudong discovery probe' && git pull --rebase origin main && git push origin HEAD:main)
