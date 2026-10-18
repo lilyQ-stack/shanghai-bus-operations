@@ -1,0 +1,43 @@
+name: SHMAAS Pudong Route Inventory
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paginate route discovery without modifying main collector
+        run: |
+          python - <<'PY'
+          import json,time,urllib.request,pathlib,datetime
+          endpoint='https://api.shmaas.net/traffic/v2/querytrafficline'
+          headers={'Content-Type':'application/json','X-Saic-CityCode':'310100','User-Agent':'shanghai-bus-operations/1.0'}
+          rows=[]; pages=[]; error=None
+          for page in range(1,16):
+              payload=json.dumps({'keywords':'浦东','type':0,'pageNo':page,'pageSize':20},ensure_ascii=False).encode()
+              req=urllib.request.Request(endpoint,data=payload,headers=headers,method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=12) as response: doc=json.load(response)
+                  if doc.get('errCode')!=0: raise ValueError(str(doc.get('errMsg')))
+                  data=doc.get('data') or {}; entries=data.get('trafficStop') or []
+                  pages.append({'page':page,'returned':len(entries),'rowCount':data.get('rowCount'),'pageCount':data.get('pageCount')})
+                  for entry in entries:
+                      for item in [entry.get('lineInfo') or {},*(entry.get('stopLineInfo') or [])]:
+                          name=str(item.get('lineName') or '')
+                          if name.startswith('浦东') and item.get('lineId'): rows.append({'lineId':str(item['lineId']),'lineName':name})
+                  if not entries or (isinstance(data.get('pageCount'),int) and page>=data['pageCount']):break
+                  time.sleep(0.35)
+              except Exception as exc:error=repr(exc);break
+          unique=sorted({(x['lineId'],x['lineName']) for x in rows},key=lambda x:x[1])
+          result={'tested_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'pages':pages,'routes':[{'lineId':i,'lineName':n} for i,n in unique],'error':error,'note':'Discovery only; no bus stop arrival calls and no production collection modifications'}
+          path=pathlib.Path('pudong-route-inventory.json');path.write_text(json.dumps(result,ensure_ascii=False,indent=2))
+          print(json.dumps(result,ensure_ascii=False)[:16000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pudong-route-inventory
+          path: pudong-route-inventory.json
+          retention-days: 7
