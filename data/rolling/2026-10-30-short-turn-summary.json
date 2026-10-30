@@ -1,6 +1,6 @@
 {
   "date_cst": "2026-10-30",
-  "generated_at_cst": "2026-10-30T14:24:41+08:00",
+  "generated_at_cst": "2026-10-30T21:18:20+08:00",
   "provisional": true,
   "counting_unit": "trip",
   "trip_key": [
@@ -17,17 +17,27 @@
   ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": "2026-10-30T14:14:11+08:00",
-      "candidate_count": 0,
-      "trip_count": 0,
-      "vehicle_count": 0,
-      "candidates": []
+      "cutoff_cst": "2026-10-30T21:11:10+08:00",
+      "candidate_count": 1,
+      "trip_count": 1,
+      "vehicle_count": 1,
+      "candidates": [
+        {
+          "plate": "沪A61166D",
+          "direction": 1,
+          "departure": "10:45",
+          "origin": "锦带路迎春路（浦东新区办公中心）",
+          "destination": "港城路地铁站",
+          "reason": "原方向在全程46%处后消失；随后反向物理轨迹由seq28推进至seq36，推进8站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        }
+      ]
     },
     "浦东35路": {
-      "cutoff_cst": "2026-10-30T14:14:42+08:00",
-      "candidate_count": 5,
-      "trip_count": 5,
-      "vehicle_count": 4,
+      "cutoff_cst": "2026-10-30T21:11:41+08:00",
+      "candidate_count": 7,
+      "trip_count": 7,
+      "vehicle_count": 5,
       "candidates": [
         {
           "plate": "沪A72305D",
@@ -71,7 +81,25 @@
           "departure": "12:30",
           "origin": "康恩路康浦路",
           "destination": "东高路张杨北路",
-          "reason": "原方向在全程36%处后消失；随后反向物理轨迹由seq41推进至seq49，推进8站，达到≥2站确认条件",
+          "reason": "原方向在全程36%处后消失；随后反向物理轨迹由seq41推进至seq57，推进16站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A72305D",
+          "direction": 0,
+          "departure": "15:35",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程48%处后消失；随后反向物理轨迹由seq33推进至seq59，推进26站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        },
+        {
+          "plate": "沪A55102D",
+          "direction": 0,
+          "departure": "19:10",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程44%处后消失；随后反向物理轨迹由seq29推进至seq56，推进27站，达到≥2站确认条件",
           "last_reliable_stop": ""
         }
       ]
