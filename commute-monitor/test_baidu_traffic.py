@@ -75,8 +75,41 @@ def probe(label, address, radius, roads):
     print("定位结论: 仅为地理编码候选点，尚未核实是否落在35路实际行驶路段")
     return data.get("status") == 0
 
+
+def compare_geocodes():
+    """Diagnostic only: candidate geocodes are never adopted automatically."""
+    groups = (
+        ("学校", (
+            "上海市浦东新区长岛路柳埠路",
+            "上海市浦东新区长岛路柳埠路公交站",
+            "上海市浦东新区柳埠路与长岛路交叉口",
+        )),
+        ("小桥", (
+            "上海市浦东新区金杨路金业路",
+            "上海市浦东新区金杨路金业路公交站",
+            "上海市浦东新区金杨路与金业路交叉口",
+        )),
+    )
+    print("\n=== 候选坐标对照（仅供人工核对） ===")
+    for label, addresses in groups:
+        print("位置:", label)
+        for index, address in enumerate(addresses, 1):
+            try:
+                data = geocode(address)
+                result = data.get("result") or {}
+                loc = result.get("location") or {}
+                print("候选", index, address)
+                print("  状态:", data.get("status"),
+                      "precise:", result.get("precise"),
+                      "confidence:", result.get("confidence"),
+                      "level:", result.get("level"))
+                print("  BD09:", loc.get("lat", "无"), loc.get("lng", "无"))
+            except Exception as exc:
+                print("候选", index, "异常类型:", type(exc).__name__)
+
 def main():
     print("北京时间:", datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S"))
+    compare_geocodes()
     failed = False
     for target in TARGETS:
         try:
