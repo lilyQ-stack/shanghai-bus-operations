@@ -107,9 +107,33 @@ def compare_geocodes():
             except Exception as exc:
                 print("候选", index, "异常类型:", type(exc).__name__)
 
+def calibrate_bridge_corridor():
+    """Compare endpoints only; never infer bridge center by midpoint."""
+    print("\n=== 金杨路桥梁区间校准（坐标仅为候选） ===")
+    addresses = (
+        ("东侧参考：金杨路与金业路交叉口", "上海市浦东新区金杨路与金业路交叉口"),
+        ("西侧参考：金杨路与金桥路交叉口", "上海市浦东新区金杨路与金桥路交叉口"),
+    )
+    for label, address in addresses:
+        try:
+            data = geocode(address)
+            result = data.get("result") or {}
+            loc = result.get("location") or {}
+            print(label)
+            print("  状态:", data.get("status"),
+                  "置信度:", result.get("confidence"),
+                  "定位级别:", result.get("level"),
+                  "精确标志:", result.get("precise"))
+            print("  BD09纬度:", loc.get("lat", "无"),
+                  "经度:", loc.get("lng", "无"))
+        except Exception as exc:
+            print(label, "查询异常类型:", type(exc).__name__)
+    print("注意：两个路口坐标不是桥梁坐标；需结合河道地图人工确认。")
+
 def main():
     print("北京时间:", datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S"))
     compare_geocodes()
+    calibrate_bridge_corridor()
     failed = False
     for target in TARGETS:
         try:
