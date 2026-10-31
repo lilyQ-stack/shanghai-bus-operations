@@ -130,10 +130,39 @@ def calibrate_bridge_corridor():
             print(label, "查询异常类型:", type(exc).__name__)
     print("注意：两个路口坐标不是桥梁坐标；需结合河道地图人工确认。")
 
+def scan_bridge_candidates():
+    """Exploratory sampling, NOT surveyed bridge coordinates."""
+    print("\n=== 西沟港金杨路桥候选采样（非精确桥心） ===")
+    east = (31.26261655179258, 121.59441085013457)
+    west = (31.26134638455894, 121.59175860889343)
+    for fraction in (0.2, 0.35, 0.5, 0.65, 0.8):
+        lat = east[0] * (1 - fraction) + west[0] * fraction
+        lng = east[1] * (1 - fraction) + west[1] * fraction
+        print("候选比例:", fraction, "BD09纬度:", round(lat, 7), "经度:", round(lng, 7))
+        for radius in (120, 200):
+            try:
+                data = around(lat, lng, radius)
+                traffic = data.get("road_traffic") or []
+                matches = [item for item in traffic if "金杨路" in str(item.get("road_name") or "")]
+                print("  半径:", radius, "状态:", data.get("status"),
+                      "道路总数:", len(traffic), "金杨路匹配:", len(matches))
+                for item in matches[:3]:
+                    sections = item.get("congestion_sections") or []
+                    print("    道路:", str(item.get("road_name") or "")[:50],
+                          "拥堵分段:", len(sections))
+                    for section in sections[:3]:
+                        print("      描述:", str(section.get("section_desc") or "无")[:90],
+                              "等级:", section.get("status", "无"),
+                              "速度:", section.get("speed", "无"))
+            except Exception as exc:
+                print("  半径:", radius, "查询异常类型:", type(exc).__name__)
+    print("结论限制：线性插值点不是桥梁坐标，路况匹配不能证明桥面覆盖。")
+
 def main():
     print("北京时间:", datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S"))
     compare_geocodes()
     calibrate_bridge_corridor()
+    scan_bridge_candidates()
     failed = False
     for target in TARGETS:
         try:
