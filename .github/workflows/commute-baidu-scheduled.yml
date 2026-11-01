@@ -1,0 +1,31 @@
+name: Commute Baidu Traffic Scheduled Snapshots
+on:
+  schedule:
+    # UTC Sun-Thu 22:30-22:59 = Beijing Mon-Fri 06:30-06:59
+    - cron: '*/5 22 * * 0-4'
+    # UTC Sun-Thu 23:00-23:20 = Beijing Mon-Fri 07:00-07:20
+    - cron: '0,5,10,15,20 23 * * 0-4'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: commute-baidu-snapshots
+  cancel-in-progress: false
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect isolated traffic snapshot
+        env:
+          BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
+        run: python3 commute-monitor/collect_traffic_snapshot.py
+      - name: Preserve snapshot as workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: baidu-traffic-${{ github.run_id }}
+          path: commute-monitor/output/*.json
+          if-no-files-found: warn
+          retention-days: 30
