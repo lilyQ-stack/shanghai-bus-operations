@@ -1,0 +1,26 @@
+name: Pudong35 One-off Full Stop Reference Probe
+on:
+  pull_request:
+    paths:
+      - 'src/export_pudong35_full_stop_reference.py'
+      - '.github/workflows/pudong35-full-stop-probe.yml'
+  workflow_dispatch:
+jobs:
+  reference-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Query existing line metadata only (no vehicle ETA sampling)
+        run: python src/export_pudong35_full_stop_reference.py --write
+      - name: Upload reference for manual review (never commit automatically)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pudong35-full-stop-reference
+          path: data/reference/pudong35-stop-map-full.json
+          retention-days: 7
