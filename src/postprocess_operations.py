@@ -37,12 +37,19 @@ def load_verified_stop_maps():
     Partial references are allowed. Missing sequences remain unmapped, never
     substituted with the nearest sampled stop.
     """
-    path=ROOT/'data/reference/pudong35-stop-map-verified-partial.json'
+    base=ROOT/'data/reference'
+    full=base/'pudong35-stop-map-full.json'
+    partial=base/'pudong35-stop-map-verified-partial.json'
+    path=full if full.exists() else partial
     maps=defaultdict(dict)
     if not path.exists():return maps
     try:
         ref=json.loads(path.read_text(encoding='utf-8'))
         if ref.get('route')!='浦东35路':return maps
+        if path==full:
+            if ref.get('status')!='full_api_stop_list_reviewed':return maps
+            counts={int(d['direction']):int(d['stop_count']) for d in ref.get('directions',[])}
+            if counts!={0:64,1:65}:return maps
         for dmeta in ref.get('directions',[]):
             direction=int(dmeta['direction'])
             count=int(dmeta['stop_count'])
