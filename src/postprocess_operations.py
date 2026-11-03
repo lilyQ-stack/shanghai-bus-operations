@@ -40,16 +40,20 @@ def load_verified_stop_maps():
     base=ROOT/'data/reference'
     full=base/'pudong35-stop-map-full.json'
     partial=base/'pudong35-stop-map-verified-partial.json'
-    path=full if full.exists() else partial
     maps=defaultdict(dict)
+    path=partial
+    if full.exists():
+        try:
+            candidate=json.loads(full.read_text(encoding='utf-8'))
+            counts={int(d['direction']):int(d['stop_count']) for d in candidate.get('directions',[])}
+            if candidate.get('route')=='浦东35路' and candidate.get('status')=='full_api_stop_list_reviewed' and counts=={0:64,1:65}:
+                path=full
+        except (ValueError,TypeError,KeyError,OSError,json.JSONDecodeError):
+            pass
     if not path.exists():return maps
     try:
         ref=json.loads(path.read_text(encoding='utf-8'))
         if ref.get('route')!='浦东35路':return maps
-        if path==full:
-            if ref.get('status')!='full_api_stop_list_reviewed':return maps
-            counts={int(d['direction']):int(d['stop_count']) for d in ref.get('directions',[])}
-            if counts!={0:64,1:65}:return maps
         for dmeta in ref.get('directions',[]):
             direction=int(dmeta['direction'])
             count=int(dmeta['stop_count'])
