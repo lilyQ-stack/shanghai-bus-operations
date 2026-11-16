@@ -1,6 +1,6 @@
 {
   "date_cst": "2026-11-16",
-  "generated_at_cst": "2026-11-16T04:00:24+08:00",
+  "generated_at_cst": "2026-11-16T08:43:09+08:00",
   "provisional": true,
   "counting_unit": "trip",
   "trip_key": [
@@ -17,18 +17,28 @@
   ],
   "routes": {
     "浦东78路": {
-      "cutoff_cst": "2026-11-16T03:51:59+08:00",
+      "cutoff_cst": "2026-11-16T08:31:30+08:00",
       "candidate_count": 0,
       "trip_count": 0,
       "vehicle_count": 0,
       "candidates": []
     },
     "浦东35路": {
-      "cutoff_cst": "2026-11-16T03:52:27+08:00",
-      "candidate_count": 0,
-      "trip_count": 0,
-      "vehicle_count": 0,
-      "candidates": []
+      "cutoff_cst": "2026-11-16T08:32:03+08:00",
+      "candidate_count": 1,
+      "trip_count": 1,
+      "vehicle_count": 1,
+      "candidates": [
+        {
+          "plate": "沪A50793D",
+          "direction": 0,
+          "departure": "06:36",
+          "origin": "东高路张杨北路",
+          "destination": "康恩路康浦路",
+          "reason": "原方向在全程48%处后消失；随后反向物理轨迹由seq30推进至seq42，推进12站，达到≥2站确认条件",
+          "last_reliable_stop": ""
+        }
+      ]
     }
   }
 }
