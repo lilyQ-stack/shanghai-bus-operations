@@ -31,6 +31,40 @@ def physical_seq(obs):
     if stop_seq<=0:return None
     return max(1,stop_seq-remaining)
 
+def load_verified_stop_maps():
+    """Load only explicitly verified direction/physical-sequence mappings.
+
+    Partial references are allowed. Missing sequences remain unmapped, never
+    substituted with the nearest sampled stop.
+    """
+    base=ROOT/'data/reference'
+    full=base/'pudong35-stop-map-full.json'
+    partial=base/'pudong35-stop-map-verified-partial.json'
+    maps=defaultdict(dict)
+    path=partial
+    if full.exists():
+        try:
+            candidate=json.loads(full.read_text(encoding='utf-8'))
+            counts={int(d['direction']):int(d['stop_count']) for d in candidate.get('directions',[])}
+            if candidate.get('route')=='浦东35路' and candidate.get('status')=='full_api_stop_list_reviewed' and counts=={0:64,1:65}:
+                path=full
+        except (ValueError,TypeError,KeyError,OSError,json.JSONDecodeError):
+            pass
+    if not path.exists():return maps
+    try:
+        ref=json.loads(path.read_text(encoding='utf-8'))
+        if ref.get('route')!='浦东35路':return maps
+        for dmeta in ref.get('directions',[]):
+            direction=int(dmeta['direction'])
+            count=int(dmeta['stop_count'])
+            for stop in dmeta.get('verified_stops',[]):
+                seq=int(stop['seq']);name=str(stop.get('stop_name') or '').strip()
+                if 1<=seq<=count and name:
+                    maps[('浦东35路',direction)][seq]=name
+    except (ValueError,TypeError,KeyError, OSError, json.JSONDecodeError):
+        return defaultdict(dict)
+    return maps
+
 def load_raw(date):
     events=defaultdict(list); sightings=defaultdict(lambda:defaultdict(list)); stop_maps=defaultdict(dict)
     for path in sorted((ROOT/'data/shmaas').glob(f'{date}-*.jsonl')):
@@ -61,6 +95,15 @@ def load_raw(date):
                     events[(route,plate)].append({'time':captured,'direction':direction,'role':role,'stop_name':str(obs.get('stop_name') or ''),'stop_seq':obs.get('stop_seq'),'remaining_stops':obs.get('remaining_stops'),'physical_seq':pseq,'eta':eta})
                     dispatch=str(obs.get('dispatch_time') or '').strip()
                     if dispatch:sightings[(route,plate,direction)][dispatch].append(captured)
+    # Verified static entries supplement sampled metadata; conflicting names
+    # remain unresolved rather than silently overwriting either source.
+    for map_key,entries in load_verified_stop_maps().items():
+        for seq,name in entries.items():
+            existing=stop_maps[map_key].get(seq)
+            if existing and existing!=name:
+                stop_maps[map_key].pop(seq,None)
+            elif not existing:
+                stop_maps[map_key][seq]=name
     for k in events:events[k].sort(key=lambda x:x['time'])
     return events,sightings,stop_maps
 
